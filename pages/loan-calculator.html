@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan & Interest Calculator | ToolboxTree</title>
+<meta name="description" content="Work out monthly repayments and total interest on a loan.">
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+</head>
+<body data-root="../" data-nav="tools">
+<div id="site-nav"></div>
+
+<main class="section container">
+  <div class="section-head"><h1 style="font-size:1.8rem;">Loan &amp; Interest Calculator</h1><p>Estimate repayments — figures are indicative only, not financial advice.</p></div>
+
+  <div class="tool-widget" style="max-width:480px;">
+    <div class="card">
+      <label>Loan amount</label>
+      <div class="field-row"><input type="number" id="amount" placeholder="10000"></div>
+      <label style="display:block; margin-top:14px;">Annual interest rate (%)</label>
+      <div class="field-row"><input type="number" id="rate" placeholder="6.5"></div>
+      <label style="display:block; margin-top:14px;">Term (years)</label>
+      <div class="field-row"><input type="number" id="years" placeholder="5"></div>
+
+      <div class="stat-row" style="margin-top:22px;">
+        <div class="stat-box"><div class="num" id="monthly">—</div><div class="lab">Per month</div></div>
+        <div class="stat-box"><div class="num" id="totalInterest">—</div><div class="lab">Total interest</div></div>
+        <div class="stat-box"><div class="num" id="totalPaid">—</div><div class="lab">Total paid</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+<script>
+function calc() {
+  const P = parseFloat(document.getElementById('amount').value);
+  const annualRate = parseFloat(document.getElementById('rate').value);
+  const years = parseFloat(document.getElementById('years').value);
+  const out1 = document.getElementById('monthly'), out2 = document.getElementById('totalInterest'), out3 = document.getElementById('totalPaid');
+  if (![P, annualRate, years].every(Number.isFinite) || P <= 0 || years <= 0) {
+    out1.textContent = out2.textContent = out3.textContent = '—'; return;
+  }
+  const r = annualRate / 100 / 12;
+  const n = years * 12;
+  const monthly = r === 0 ? P / n : (P * r) / (1 - Math.pow(1 + r, -n));
+  const totalPaid = monthly * n;
+  out1.textContent = '$' + monthly.toFixed(2);
+  out2.textContent = '$' + (totalPaid - P).toFixed(2);
+  out3.textContent = '$' + totalPaid.toFixed(2);
+}
+['amount','rate','years'].forEach(id => document.getElementById(id).addEventListener('input', calc));
+</script>
+</body>
+</html>

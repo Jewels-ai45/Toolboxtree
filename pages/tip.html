@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tip Calculator | ToolboxTree</title>
+<meta name="description" content="Work out the tip and split the bill in seconds.">
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+</head>
+<body data-root="../" data-nav="quick">
+<div id="site-nav"></div>
+
+<main class="section container">
+  <div class="section-head"><h1 style="font-size:1.8rem;">Tip Calculator</h1><p>Set the bill, the tip percentage and how many are splitting.</p></div>
+
+  <div class="tool-widget" style="max-width:480px;">
+    <div class="card">
+      <label>Bill amount</label>
+      <div class="field-row"><input type="number" id="bill" placeholder="0.00"></div>
+
+      <label style="display:block; margin-top:16px;">Tip percentage: <strong id="tipLabel">15%</strong></label>
+      <input type="range" id="tip" min="0" max="30" value="15" style="width:100%; accent-color:var(--teal-700);">
+
+      <label style="display:block; margin-top:16px;">Split between</label>
+      <div class="field-row"><input type="number" id="people" value="1" min="1"></div>
+
+      <div class="stat-row" style="margin-top:22px;">
+        <div class="stat-box"><div class="num" id="tipAmt">$0</div><div class="lab">Tip</div></div>
+        <div class="stat-box"><div class="num" id="totalAmt">$0</div><div class="lab">Total</div></div>
+        <div class="stat-box"><div class="num" id="perPerson">$0</div><div class="lab">Per person</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+<script>
+function calc() {
+  const bill = parseFloat(document.getElementById('bill').value) || 0;
+  const tipPct = parseFloat(document.getElementById('tip').value);
+  const people = Math.max(1, parseInt(document.getElementById('people').value) || 1);
+  document.getElementById('tipLabel').textContent = tipPct + '%';
+  const tip = bill * (tipPct / 100);
+  const total = bill + tip;
+  document.getElementById('tipAmt').textContent = '$' + tip.toFixed(2);
+  document.getElementById('totalAmt').textContent = '$' + total.toFixed(2);
+  document.getElementById('perPerson').textContent = '$' + (total / people).toFixed(2);
+}
+['bill','tip','people'].forEach(id => document.getElementById(id).addEventListener('input', calc));
+calc();
+</script>
+</body>
+</html>

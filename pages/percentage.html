@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Percentage Calculator | ToolboxTree</title>
+<meta name="description" content="Find percentages, ratios, and percentage change in seconds.">
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+</head>
+<body data-root="../" data-nav="quick">
+<div id="site-nav"></div>
+
+<main class="section container">
+  <div class="section-head"><h1 style="font-size:1.8rem;">Percentage Calculator</h1><p>Three common percentage problems, solved instantly.</p></div>
+
+  <div class="tool-widget" style="max-width:560px; display:grid; gap:20px;">
+    <div class="card">
+      <h3>What is X% of Y?</h3>
+      <div class="field-row">
+        <input type="number" id="p1x" placeholder="%">
+        <span style="align-self:center;">% of</span>
+        <input type="number" id="p1y" placeholder="Number">
+      </div>
+      <div class="result-box"><span class="big" id="p1result">—</span></div>
+    </div>
+
+    <div class="card">
+      <h3>X is what % of Y?</h3>
+      <div class="field-row">
+        <input type="number" id="p2x" placeholder="X">
+        <span style="align-self:center;">is % of</span>
+        <input type="number" id="p2y" placeholder="Y">
+      </div>
+      <div class="result-box"><span class="big" id="p2result">—</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Percentage change from X to Y</h3>
+      <div class="field-row">
+        <input type="number" id="p3x" placeholder="From">
+        <span style="align-self:center;">→</span>
+        <input type="number" id="p3y" placeholder="To">
+      </div>
+      <div class="result-box"><span class="big" id="p3result">—</span></div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+<script>
+function bind(ids, fn, outId) {
+  ids.forEach(id => document.getElementById(id).addEventListener('input', calc));
+  function calc() {
+    const vals = ids.map(id => parseFloat(document.getElementById(id).value));
+    const out = document.getElementById(outId);
+    if (vals.some(v => Number.isNaN(v))) { out.textContent = '—'; return; }
+    out.textContent = fn(...vals);
+  }
+}
+bind(['p1x','p1y'], (x,y) => ((x/100)*y).toLocaleString(undefined,{maximumFractionDigits:2}), 'p1result');
+bind(['p2x','p2y'], (x,y) => y === 0 ? '—' : ((x/y)*100).toLocaleString(undefined,{maximumFractionDigits:2}) + '%', 'p2result');
+bind(['p3x','p3y'], (x,y) => x === 0 ? '—' : (((y-x)/x)*100).toLocaleString(undefined,{maximumFractionDigits:2}) + '%', 'p3result');
+</script>
+</body>
+</html>

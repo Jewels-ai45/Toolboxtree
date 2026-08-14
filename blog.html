@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog | ToolboxTree</title>
+<meta name="description" content="Guides and tips on getting more out of ToolboxTree's free tools.">
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-nav="blog">
+<div id="site-nav"></div>
+
+<main class="section container">
+  <div class="section-head"><h1 style="font-size:1.9rem;">Blog</h1><p>Short, practical guides — no fluff.</p></div>
+  <div class="grid" id="postGrid"></div>
+</main>
+
+<div id="site-footer"></div>
+<script src="js/include.js"></script>
+<script>
+// Placeholder posts — swap for real content once written. Keeping each page
+// content-rich (not just tool + 2 bullets) helps with AdSense approval.
+const posts = [
+  { title: 'How to split a PDF without installing anything', excerpt: 'A quick walkthrough of ToolboxTree\'s free PDF splitter — no software, no watermark.', tag: 'PDF' },
+  { title: '5 percentage calculations everyone should know', excerpt: 'Tips, discounts, raises and more — the mental math shortcuts worth learning.', tag: 'Finance' },
+  { title: 'Setting a weekly priority list that actually sticks', excerpt: 'Why three priorities beats a ten-item to-do list, and how the Planner\'s task matrix helps.', tag: 'Productivity' },
+];
+document.getElementById('postGrid').innerHTML = posts.map(p => `
+  <div class="card tool-card">
+    <span class="badge" style="align-self:flex-start; margin-bottom:14px;">${p.tag}</span>
+    <h3>${p.title}</h3>
+    <p>${p.excerpt}</p>
+    <a href="#" class="btn btn-ghost">Coming soon</a>
+  </div>`).join('');
+</script>
+</body>
+</html>

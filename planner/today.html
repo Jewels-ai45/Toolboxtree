@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Today — ToolboxTree Planner</title>
+<meta name="description" content="Track today's habits and log income — free, private, no sign-up planner.">
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+</head>
+<body data-root="../" data-nav="planner" data-planner="today">
+<div id="site-nav"></div>
+
+<main class="container planner-shell">
+  <nav class="planner-nav" id="planner-nav"></nav>
+
+  <div class="planner-main">
+    <div class="notice"><span class="dot"></span> Your data is saved on this device. An account is optional — sign up only if you want to sync.</div>
+
+    <h1 id="dateHeading" style="font-size:1.8rem; margin-bottom:0;">Today</h1>
+    <p id="dateSub" style="margin-top:-4px;"></p>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Daily habits</h3>
+        <span class="count" id="habitCount">0/0 done</span>
+      </div>
+      <p style="font-size:0.9rem;">Check off each habit as you complete it today.</p>
+      <div id="habitList"></div>
+      <div class="field-row">
+        <input type="text" id="newHabit" placeholder="e.g. Read 20 minutes">
+        <button class="btn btn-primary btn-sm" id="addHabit">+ Habit</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>💲 Log income</h3>
+      <p style="font-size:0.9rem;">Record money earned today — one tap, no categories required.</p>
+      <div class="field-row">
+        <input type="number" id="incomeAmt" placeholder="e.g. 120" style="max-width:140px;">
+        <input type="text" id="incomeNote" placeholder="e.g. Freelance project">
+        <button class="btn btn-primary btn-sm" id="logIncome">Log it</button>
+      </div>
+      <p id="todayIncomeTotal" style="margin-top:14px; font-weight:700; color:var(--navy);"></p>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+<script src="../js/planner.js"></script>
+<script>
+document.getElementById('dateHeading').textContent = 'Today';
+document.getElementById('dateSub').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+
+const FREE_HABIT_LIMIT = 5;
+
+function renderHabits() {
+  const habits = Store.get('habits', [
+    { text: 'Eat half to one sliced cucumber daily', done: false },
+    { text: '1 toning exercise minimum daily', done: false },
+  ]);
+  const list = document.getElementById('habitList');
+  list.innerHTML = habits.map((h, i) => `
+    <div class="checklist-row ${h.done ? 'done' : ''}">
+      <input type="checkbox" id="habit${i}" ${h.done ? 'checked' : ''} data-i="${i}">
+      <label for="habit${i}">${h.text}</label>
+    </div>`).join('');
+  document.getElementById('habitCount').textContent = `${habits.filter(h => h.done).length}/${habits.length} done`;
+
+  list.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      habits[cb.dataset.i].done = cb.checked;
+      Store.set('habits', habits);
+      renderHabits();
+    });
+  });
+}
+renderHabits();
+
+document.getElementById('addHabit').addEventListener('click', () => {
+  const input = document.getElementById('newHabit');
+  const text = input.value.trim();
+  if (!text) return;
+  const habits = Store.get('habits', []);
+  if (!Store.isPremium() && habits.length >= FREE_HABIT_LIMIT) {
+    alert(`The free Planner tracks up to ${FREE_HABIT_LIMIT} habits at a time. Unlock the $14 Planner for unlimited habits and goals.`);
+    return;
+  }
+  habits.push({ text, done: false });
+  Store.set('habits', habits);
+  input.value = '';
+  renderHabits();
+});
+
+function renderIncome() {
+  const entries = Store.get('income', []);
+  const todayTotal = entries.filter(e => e.date === Store.todayKey()).reduce((s, e) => s + e.amount, 0);
+  document.getElementById('todayIncomeTotal').textContent = todayTotal > 0 ? `Logged today: $${todayTotal.toFixed(2)}` : '';
+}
+renderIncome();
+
+document.getElementById('logIncome').addEventListener('click', () => {
+  const amt = parseFloat(document.getElementById('incomeAmt').value);
+  const note = document.getElementById('incomeNote').value.trim();
+  if (!Number.isFinite(amt) || amt <= 0) return;
+  const entries = Store.get('income', []);
+  entries.push({ date: Store.todayKey(), amount: amt, note });
+  Store.set('income', entries);
+  document.getElementById('incomeAmt').value = '';
+  document.getElementById('incomeNote').value = '';
+  renderIncome();
+});
+</script>
+</body>
+</html>

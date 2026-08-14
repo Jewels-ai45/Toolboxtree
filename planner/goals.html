@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goals — ToolboxTree Planner</title>
+<meta name="description" content="Set your North Star for the year and track progress on your active goals.">
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+<style>
+  .progress-track { background: var(--border); border-radius: 999px; height: 8px; margin-top: 8px; overflow: hidden; }
+  .progress-fill { background: var(--teal-600); height: 100%; border-radius: 999px; transition: width .2s ease; }
+  .goal-item { border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-top: 14px; }
+  .goal-item .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .step-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 0.9rem; }
+</style>
+</head>
+<body data-root="../" data-nav="planner" data-planner="goals">
+<div id="site-nav"></div>
+
+<main class="container planner-shell">
+  <nav class="planner-nav" id="planner-nav"></nav>
+
+  <div class="planner-main">
+    <div class="notice"><span class="dot"></span> Your data is saved on this device. An account is optional — sign up only if you want to sync.</div>
+
+    <h1 style="font-size:1.8rem; margin-bottom:0;">Goals</h1>
+    <p style="margin-top:-4px;">Where you're headed this year.</p>
+
+    <div class="card" style="background:var(--teal-50); border-color:var(--teal-100);">
+      <h3>⭐ North Star</h3>
+      <p style="font-size:0.9rem;">The single most important outcome for your year, in one sentence.</p>
+      <div class="field-row"><input type="text" id="northStar" placeholder="e.g. Grow online income to consistent $2.5k weekly"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Active goals</h3><span class="count" id="goalCount">0/3</span></div>
+      <div id="goalList"></div>
+      <div class="field-row">
+        <input type="text" id="newGoal" placeholder="e.g. Launch newsletter to 500 subscribers">
+        <button class="btn btn-primary btn-sm" id="addGoal">+ Goal</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+<script src="../js/planner.js"></script>
+<script>
+const northStar = document.getElementById('northStar');
+northStar.value = Store.get('northStar', '');
+northStar.addEventListener('input', () => Store.set('northStar', northStar.value));
+
+const FREE_GOAL_LIMIT = 3;
+
+function renderGoals() {
+  const goals = Store.get('goals', [
+    { id: 1, text: 'Complete Gumroad profile and add Planner ($14)', progress: 0, steps: [] },
+  ]);
+  document.getElementById('goalCount').textContent = `${goals.length}/${Store.isPremium() ? '∞' : FREE_GOAL_LIMIT}`;
+  document.getElementById('goalList').innerHTML = goals.map(g => `
+    <div class="goal-item" data-id="${g.id}">
+      <div class="top">
+        <h3 style="margin:0;">${g.text}</h3>
+        <button class="delGoal" data-id="${g.id}" style="background:none; border:none; cursor:pointer; color:var(--danger); font-size:1.1rem;" aria-label="Delete goal">🗑</button>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:var(--muted); margin-top:10px;">
+        <span>Progress</span><span>${g.progress}%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${g.progress}%;"></div></div>
+      <div class="field-row">
+        <input type="text" placeholder="Add a step, e.g. Draft proposal" class="stepInput" data-id="${g.id}">
+        <button class="btn btn-ghost btn-sm addStep" data-id="${g.id}">+</button>
+      </div>
+      ${g.steps.map((s, i) => `
+        <div class="step-row">
+          <input type="checkbox" ${s.done ? 'checked' : ''} class="stepCheck" data-gid="${g.id}" data-si="${i}">
+          <label style="${s.done ? 'color:var(--faint); text-decoration:line-through;' : ''}">${s.text}</label>
+        </div>`).join('')}
+    </div>`).join('');
+
+  document.querySelectorAll('.delGoal').forEach(btn => btn.addEventListener('click', () => {
+    let goals = Store.get('goals', []);
+    goals = goals.filter(g => g.id !== Number(btn.dataset.id));
+    Store.set('goals', goals);
+    renderGoals();
+  }));
+
+  document.querySelectorAll('.addStep').forEach(btn => btn.addEventListener('click', () => {
+    const input = document.querySelector(`.stepInput[data-id="${btn.dataset.id}"]`);
+    const text = input.value.trim();
+    if (!text) return;
+    const goals = Store.get('goals', []);
+    const g = goals.find(g => g.id === Number(btn.dataset.id));
+    g.steps.push({ text, done: false });
+    recalcProgress(g);
+    Store.set('goals', goals);
+    renderGoals();
+  }));
+
+  document.querySelectorAll('.stepCheck').forEach(cb => cb.addEventListener('change', () => {
+    const goals = Store.get('goals', []);
+    const g = goals.find(g => g.id === Number(cb.dataset.gid));
+    g.steps[cb.dataset.si].done = cb.checked;
+    recalcProgress(g);
+    Store.set('goals', goals);
+    renderGoals();
+  }));
+}
+function recalcProgress(g) {
+  g.progress = g.steps.length ? Math.round((g.steps.filter(s => s.done).length / g.steps.length) * 100) : 0;
+}
+renderGoals();
+
+document.getElementById('addGoal').addEventListener('click', () => {
+  const input = document.getElementById('newGoal');
+  const text = input.value.trim();
+  if (!text) return;
+  const goals = Store.get('goals', []);
+  if (!Store.isPremium() && goals.length >= FREE_GOAL_LIMIT) {
+    alert(`The free Planner tracks up to ${FREE_GOAL_LIMIT} active goals. Unlock the $14 Planner for unlimited goals.`);
+    return;
+  }
+  goals.push({ id: Date.now(), text, progress: 0, steps: [] });
+  Store.set('goals', goals);
+  input.value = '';
+  renderGoals();
+});
+</script>
+</body>
+</html>

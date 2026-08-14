@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Online Calculator | ToolboxTree</title>
+<meta name="description" content="A fast, reliable free online calculator for everyday arithmetic — addition, subtraction, multiplication and division, right in your browser.">
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+</head>
+<body data-root="../" data-nav="tools">
+<div id="site-nav"></div>
+
+<main class="section container">
+  <div class="section-head">
+    <h1 style="font-size:1.8rem;">Free Online Calculator</h1>
+    <p>Everyday arithmetic, done instantly. Nothing you type is stored or sent anywhere.</p>
+  </div>
+
+  <div class="tool-widget">
+    <div class="calc-display" id="display">0</div>
+    <div class="calc-grid">
+      <button class="clear" data-act="clear">AC</button>
+      <button class="op" data-act="sign">±</button>
+      <button class="op" data-act="percent">%</button>
+      <button class="op" data-val="/">÷</button>
+
+      <button data-val="7">7</button>
+      <button data-val="8">8</button>
+      <button data-val="9">9</button>
+      <button class="op" data-val="*">×</button>
+
+      <button data-val="4">4</button>
+      <button data-val="5">5</button>
+      <button data-val="6">6</button>
+      <button class="op" data-val="-">−</button>
+
+      <button data-val="1">1</button>
+      <button data-val="2">2</button>
+      <button data-val="3">3</button>
+      <button class="op" data-val="+">+</button>
+
+      <button data-val="0" style="grid-column:span 2;">0</button>
+      <button data-val=".">.</button>
+      <button class="eq" data-act="equals">=</button>
+    </div>
+  </div>
+
+  <div class="container" style="margin-top:48px; max-width:680px;">
+    <h2 style="font-size:1.2rem;">Use cases</h2>
+    <ul style="color:var(--muted);">
+      <li>Quickly balancing personal budgets</li>
+      <li>Solving math homework easily</li>
+      <li>Checking totals before a purchase</li>
+    </ul>
+  </div>
+  <div class="container" style="max-width:680px;"><div class="ad-slot" aria-hidden="true"></div></div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+<script>
+let expr = '';
+const display = document.getElementById('display');
+
+function update() { display.textContent = expr || '0'; }
+
+document.querySelector('.calc-grid').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const { act, val } = btn.dataset;
+
+  if (val !== undefined) { expr += val; update(); return; }
+
+  if (act === 'clear') { expr = ''; update(); return; }
+  if (act === 'sign') {
+    const m = expr.match(/(-?\d*\.?\d+)$/);
+    if (m) expr = expr.slice(0, m.index) + (m[0].startsWith('-') ? m[0].slice(1) : '-' + m[0]);
+    update(); return;
+  }
+  if (act === 'percent') {
+    const m = expr.match(/(-?\d*\.?\d+)$/);
+    if (m) expr = expr.slice(0, m.index) + (parseFloat(m[0]) / 100);
+    update(); return;
+  }
+  if (act === 'equals') {
+    try {
+      // Safe-ish eval: only digits, operators, dot, parens allowed
+      if (/^[0-9+\-*/.() ]*$/.test(expr)) {
+        const result = Function('"use strict";return (' + expr + ')')();
+        expr = Number.isFinite(result) ? String(Math.round(result * 1e10) / 1e10) : 'Error';
+      } else {
+        expr = 'Error';
+      }
+    } catch { expr = 'Error'; }
+    update();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (/[0-9.+\-*/]/.test(e.key)) { expr += e.key; update(); }
+  else if (e.key === 'Enter' || e.key === '=') { document.querySelector('[data-act="equals"]').click(); }
+  else if (e.key === 'Backspace') { expr = expr.slice(0, -1); update(); }
+  else if (e.key === 'Escape') { expr = ''; update(); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Counter | ToolboxTree</title>
+<meta name="description" content="Count words, characters, sentences, and reading time.">
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+</head>
+<body data-root="../" data-nav="quick">
+<div id="site-nav"></div>
+
+<main class="section container">
+  <div class="section-head"><h1 style="font-size:1.8rem;">Word Counter</h1><p>Paste or type — counts update as you go.</p></div>
+
+  <div class="tool-widget" style="max-width:680px;">
+    <textarea id="text" placeholder="Start typing or paste your text here…"
+      style="width:100%; min-height:260px; padding:18px; border-radius:16px; border:1px solid var(--border-strong); font-family:var(--font-body); font-size:1rem; resize:vertical;"></textarea>
+    <div class="stat-row" style="grid-template-columns:repeat(4,1fr); margin-top:20px;">
+      <div class="stat-box"><div class="num" id="words">0</div><div class="lab">Words</div></div>
+      <div class="stat-box"><div class="num" id="chars">0</div><div class="lab">Characters</div></div>
+      <div class="stat-box"><div class="num" id="sentences">0</div><div class="lab">Sentences</div></div>
+      <div class="stat-box"><div class="num" id="readtime">0 min</div><div class="lab">Read time</div></div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+<script>
+const text = document.getElementById('text');
+text.addEventListener('input', () => {
+  const val = text.value;
+  const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+  const sentences = val.trim() ? (val.match(/[.!?]+/g) || []).length || (val.trim() ? 1 : 0) : 0;
+  document.getElementById('words').textContent = words;
+  document.getElementById('chars').textContent = val.length;
+  document.getElementById('sentences').textContent = sentences;
+  document.getElementById('readtime').textContent = Math.max(1, Math.round(words / 200)) + ' min';
+});
+</script>
+</body>
+</html>

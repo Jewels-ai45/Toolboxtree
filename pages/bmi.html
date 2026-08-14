@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMI Calculator | ToolboxTree</title>
+<meta name="description" content="Calculate your Body Mass Index in metric or imperial units.">
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+</head>
+<body data-root="../" data-nav="quick">
+<div id="site-nav"></div>
+
+<main class="section container">
+  <div class="section-head"><h1 style="font-size:1.8rem;">BMI Calculator</h1><p>An indicative measure only — not a diagnosis. Check with a health professional for guidance specific to you.</p></div>
+
+  <div class="tool-widget" style="max-width:480px;">
+    <div class="pillbar" id="unitbar" style="justify-content:center; margin-bottom:20px;">
+      <button class="pill" data-u="metric" aria-pressed="true">Metric</button>
+      <button class="pill" data-u="imperial" aria-pressed="false">Imperial</button>
+    </div>
+    <div class="card">
+      <div id="metricFields">
+        <label>Height (cm)</label>
+        <div class="field-row"><input type="number" id="hcm" placeholder="170"></div>
+        <label style="display:block; margin-top:14px;">Weight (kg)</label>
+        <div class="field-row"><input type="number" id="wkg" placeholder="65"></div>
+      </div>
+      <div id="imperialFields" style="display:none;">
+        <label>Height (ft / in)</label>
+        <div class="field-row"><input type="number" id="hft" placeholder="5"><input type="number" id="hin" placeholder="7"></div>
+        <label style="display:block; margin-top:14px;">Weight (lb)</label>
+        <div class="field-row"><input type="number" id="wlb" placeholder="145"></div>
+      </div>
+      <div class="result-box" style="margin-top:20px;">
+        <div class="big" id="bmiVal">—</div>
+        <div id="bmiCat" style="color:var(--muted); font-weight:600; margin-top:4px;"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+<script>
+let unit = 'metric';
+const unitbar = document.getElementById('unitbar');
+unitbar.addEventListener('click', e => {
+  const btn = e.target.closest('.pill'); if (!btn) return;
+  unitbar.querySelectorAll('.pill').forEach(p => p.setAttribute('aria-pressed','false'));
+  btn.setAttribute('aria-pressed','true');
+  unit = btn.dataset.u;
+  document.getElementById('metricFields').style.display = unit === 'metric' ? 'block' : 'none';
+  document.getElementById('imperialFields').style.display = unit === 'imperial' ? 'block' : 'none';
+  calc();
+});
+
+function category(bmi) {
+  if (bmi < 18.5) return 'Underweight';
+  if (bmi < 25) return 'Healthy range';
+  if (bmi < 30) return 'Overweight';
+  return 'Obesity range';
+}
+
+function calc() {
+  let bmi;
+  if (unit === 'metric') {
+    const h = parseFloat(document.getElementById('hcm').value) / 100;
+    const w = parseFloat(document.getElementById('wkg').value);
+    bmi = w / (h * h);
+  } else {
+    const ft = parseFloat(document.getElementById('hft').value) || 0;
+    const inch = parseFloat(document.getElementById('hin').value) || 0;
+    const totalIn = ft * 12 + inch;
+    const w = parseFloat(document.getElementById('wlb').value);
+    bmi = (703 * w) / (totalIn * totalIn);
+  }
+  const out = document.getElementById('bmiVal');
+  const cat = document.getElementById('bmiCat');
+  if (Number.isFinite(bmi) && bmi > 0) {
+    out.textContent = bmi.toFixed(1);
+    cat.textContent = category(bmi);
+  } else { out.textContent = '—'; cat.textContent = ''; }
+}
+document.querySelectorAll('input').forEach(el => el.addEventListener('input', calc));
+</script>
+</body>
+</html>

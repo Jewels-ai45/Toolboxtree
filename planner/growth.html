@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Growth — ToolboxTree Planner</title>
+<meta name="description" content="Track monthly income against your goal and see what the $14 Planner unlocks.">
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+</head>
+<body data-root="../" data-nav="planner" data-planner="growth">
+<div id="site-nav"></div>
+
+<main class="container planner-shell">
+  <nav class="planner-nav" id="planner-nav"></nav>
+
+  <div class="planner-main">
+    <div class="notice"><span class="dot"></span> Your data is saved on this device. An account is optional — sign up only if you want to sync.</div>
+
+    <h1 style="font-size:1.8rem; margin-bottom:0;">Growth</h1>
+    <p style="margin-top:-4px;">How your income is growing this month.</p>
+
+    <div class="card">
+      <h3>📈 Income this month</h3>
+      <p style="font-size:0.9rem;">Set a monthly income target and watch the tree ring fill as you log earnings.</p>
+
+      <div class="ring-progress">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#e3e8e7" stroke-width="12"/>
+          <circle id="ringFill" cx="60" cy="60" r="50" fill="none" stroke="#0f9488" stroke-width="12"
+            stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" transform="rotate(-90 60 60)"/>
+          <text x="60" y="66" text-anchor="middle" font-family="Manrope" font-weight="800" font-size="20" fill="#0b1f3a" id="ringPct">0%</text>
+        </svg>
+        <div>
+          <div class="ring-amount" id="incomeTotal">$0</div>
+          <div class="ring-goal" id="incomeGoalLabel">of $0 goal</div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <input type="number" id="goalInput" placeholder="e.g. 5000">
+        <button class="btn btn-primary btn-sm" id="setGoal">Set goal</button>
+      </div>
+    </div>
+
+    <div class="card upgrade-card">
+      <h3>🔒 Unlock the full Planner</h3>
+      <ul>
+        <li>6-month income &amp; goal history with trend charts</li>
+        <li>Income analytics with source breakdown and replacement-income projection</li>
+        <li>Unlimited goals, habits and tasks</li>
+        <li>PDF / print export of your weekly and monthly plans</li>
+        <li>Extra tree biomes for the Planner</li>
+        <li>CSV export + optional account sync</li>
+      </ul>
+      <p class="price-tag">$14 · one-time</p>
+      <a href="https://gumroad.com/" target="_blank" rel="noopener" class="btn btn-gold" style="margin-top:6px;">Unlock on Gumroad →</a>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+<script src="../js/planner.js"></script>
+<script>
+function render() {
+  const entries = Store.get('income', []);
+  const month = Store.monthKey();
+  const total = entries.filter(e => e.date.startsWith(month)).reduce((s, e) => s + e.amount, 0);
+  const goal = Store.get('monthlyGoal', 0);
+  document.getElementById('incomeTotal').textContent = '$' + total.toLocaleString();
+  document.getElementById('incomeGoalLabel').textContent = `of $${goal.toLocaleString()} goal`;
+  document.getElementById('goalInput').value = goal || '';
+
+  const pct = goal > 0 ? Math.min(100, Math.round((total / goal) * 100)) : 0;
+  const circumference = 314;
+  document.getElementById('ringFill').style.strokeDashoffset = circumference - (circumference * pct / 100);
+  document.getElementById('ringPct').textContent = pct + '%';
+}
+render();
+
+document.getElementById('setGoal').addEventListener('click', () => {
+  const val = parseFloat(document.getElementById('goalInput').value);
+  if (!Number.isFinite(val) || val < 0) return;
+  Store.set('monthlyGoal', val);
+  render();
+});
+</script>
+</body>
+</html>

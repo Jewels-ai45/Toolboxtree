@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToolboxTree — Free Online Calculators, PDF Editor & More</title>
+<meta name="description" content="Free, fast, browser-based tools: calculators, PDF editor, converters, image and text tools, plus a planner to track your goals. No sign-up required.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-nav="home">
+<div id="site-nav"></div>
+
+<main>
+  <section class="hero container">
+    <span class="eyebrow">Free forever &middot; No sign-up &middot; Runs in your browser</span>
+    <h1>Practical tools,<br>rooted in one place.</h1>
+    <p class="lead">Calculators, PDF tools, converters and more — plus a planner to keep your goals growing. Everything runs locally in your browser, so nothing you type ever leaves your device.</p>
+    <div class="hero-actions">
+      <a href="tools.html" class="btn btn-primary">Explore all tools</a>
+      <a href="planner/today.html" class="btn btn-ghost">Open the Planner</a>
+    </div>
+    <div class="trust-row">
+      <span>🔒 100% private</span>
+      <span>⚡ No sign-up required</span>
+      <span>🌱 Free forever</span>
+      <span>🚫 No clutter</span>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="tree-wrap">
+      <svg class="tree-svg" viewBox="0 0 700 460" aria-hidden="true">
+        <path class="branch" d="M350 230 L350 90"/>
+        <path class="branch" d="M350 230 L180 130"/>
+        <path class="branch" d="M350 230 L120 260"/>
+        <path class="branch" d="M350 230 L170 380"/>
+        <path class="branch" d="M350 230 L340 400"/>
+        <path class="branch" d="M350 230 L520 380"/>
+        <path class="branch" d="M350 230 L580 260"/>
+        <path class="branch" d="M350 230 L520 130"/>
+      </svg>
+      <div class="tree-center">Toolbox<br>Tree</div>
+
+      <div class="tree-node" style="left:50%; top:19%;">
+        <a href="tools.html?cat=utility">
+          <span class="ic" style="background:#e3f5f2;">🧮</span>
+          <span class="label">Utility Tools</span>
+        </a>
+      </div>
+      <div class="tree-node" style="left:25.7%; top:28%;">
+        <a href="calendar.html">
+          <span class="ic" style="background:#eaecfb;">📅</span>
+          <span class="label">Calendar</span>
+        </a>
+      </div>
+      <div class="tree-node" style="left:74.3%; top:28%;">
+        <a href="tools.html?cat=finance">
+          <span class="ic" style="background:#e9f6ec;">🏠</span>
+          <span class="label">Finance Tools</span>
+        </a>
+      </div>
+      <div class="tree-node" style="left:17%; top:56.5%;">
+        <a href="tools.html?cat=conversion">
+          <span class="ic" style="background:#fdeaea;">⚖️</span>
+          <span class="label">Conversion Tools</span>
+        </a>
+      </div>
+      <div class="tree-node" style="left:83%; top:56.5%;">
+        <a href="tools.html?cat=text">
+          <span class="ic" style="background:#fdf3e0;">T</span>
+          <span class="label">Text Tools</span>
+        </a>
+      </div>
+      <div class="tree-node" style="left:24.3%; top:82.5%;">
+        <a href="tools.html?cat=image">
+          <span class="ic" style="background:#f2e9fb;">🖼️</span>
+          <span class="label">Image Tools</span>
+        </a>
+      </div>
+      <div class="tree-node" style="left:48.6%; top:87%;">
+        <a href="tools.html?cat=pdf">
+          <span class="ic" style="background:#e3f5f2;">📄</span>
+          <span class="label">PDF Tools</span>
+        </a>
+      </div>
+      <p class="tree-hint" style="position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); width:100%;">Hover a branch to preview, tap to explore.</p>
+    </div>
+
+    <div class="tree-mobile-grid container">
+      <a href="tools.html?cat=utility"><span class="ic" style="background:#e3f5f2;">🧮</span>Utility Tools</a>
+      <a href="calendar.html"><span class="ic" style="background:#eaecfb;">📅</span>Calendar</a>
+      <a href="tools.html?cat=finance"><span class="ic" style="background:#e9f6ec;">🏠</span>Finance Tools</a>
+      <a href="tools.html?cat=conversion"><span class="ic" style="background:#fdeaea;">⚖️</span>Conversion Tools</a>
+      <a href="tools.html?cat=text"><span class="ic" style="background:#fdf3e0;">T</span>Text Tools</a>
+      <a href="tools.html?cat=image"><span class="ic" style="background:#f2e9fb;">🖼️</span>Image Tools</a>
+      <a href="tools.html?cat=pdf"><span class="ic" style="background:#e3f5f2;">📄</span>PDF Tools</a>
+    </div>
+  </section>
+
+  <div class="container"><div class="ad-slot" aria-hidden="true"></div></div>
+
+  <section class="section container">
+    <div class="section-head">
+      <h2>Most opened this week</h2>
+      <p>The tools people reach for most, ready in one tap — no account needed.</p>
+    </div>
+    <div class="grid" id="popular-tools"></div>
+    <p class="text-center" style="margin-top:28px;"><a href="quick-tools.html" class="btn btn-ghost">See all quick tools →</a></p>
+  </section>
+
+  <section class="section container">
+    <div class="card" style="display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; background:linear-gradient(155deg,#0b1f3a,#0f9488); color:#fff; border:none;">
+      <div style="max-width:520px;">
+        <h2 style="color:#fff;">Plan your goals, not just your tasks.</h2>
+        <p style="color:#dfeeec;">The free Planner tracks your daily habits, weekly priorities and income — right in your browser. Upgrade any time for deeper history, analytics and unlimited goals.</p>
+      </div>
+      <a href="planner/today.html" class="btn" style="background:#fff; color:#0f9488;">Open the Planner</a>
+    </div>
+  </section>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="js/include.js"></script>
+<script>
+  const popular = [
+    { icon: '🧮', bg: '#e3f5f2', name: 'Free Online Calculator', href: 'pages/calculator.html', desc: 'Fast everyday arithmetic, right in your browser.' },
+    { icon: '📄', bg: '#e3f5f2', name: 'Free PDF Tools', href: 'pages/pdf-tools.html', desc: 'Merge, split and compress PDFs securely.' },
+    { icon: '%', bg: '#f2e9fb', name: 'Percentage Calculator', href: 'pages/percentage.html', desc: 'Percentages, ratios and percentage change.' },
+  ];
+  document.getElementById('popular-tools').innerHTML = popular.map(t => `
+    <div class="card tool-card">
+      <div class="tool-icon" style="background:${t.bg}">${t.icon}</div>
+      <h3>${t.name}</h3>
+      <p>${t.desc}</p>
+      <a href="${t.href}" class="btn btn-primary">Open tool</a>
+    </div>`).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit Converter | ToolboxTree</title>
+<meta name="description" content="Convert length, weight, temperature, and volume instantly.">
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+</head>
+<body data-root="../" data-nav="quick">
+<div id="site-nav"></div>
+
+<main class="section container">
+  <div class="section-head"><h1 style="font-size:1.8rem;">Unit Converter</h1><p>Length, weight, temperature and volume — instant, in-browser.</p></div>
+
+  <div class="tool-widget" style="max-width:520px;">
+    <div class="pillbar" id="catbar" style="margin-bottom:20px; justify-content:center;"></div>
+    <div class="card">
+      <div class="field-row">
+        <input type="number" id="fromVal" value="1">
+        <select id="fromUnit"></select>
+      </div>
+      <p class="text-center" style="margin:14px 0; color:var(--faint);">equals</p>
+      <div class="field-row">
+        <input type="number" id="toVal" readonly>
+        <select id="toUnit"></select>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+<script>
+const UNITS = {
+  length: { m: 1, km: 1000, cm: 0.01, mm: 0.001, mi: 1609.344, yd: 0.9144, ft: 0.3048, in: 0.0254 },
+  weight: { kg: 1, g: 0.001, lb: 0.453592, oz: 0.0283495, st: 6.35029 },
+  volume: { l: 1, ml: 0.001, gal: 3.78541, qt: 0.946353, cup: 0.24 },
+};
+const CATS = Object.keys(UNITS).concat('temperature');
+const catbar = document.getElementById('catbar');
+catbar.innerHTML = CATS.map(c => `<button class="pill" data-cat="${c}" aria-pressed="${c==='length'}">${c[0].toUpperCase()+c.slice(1)}</button>`).join('');
+
+const fromUnit = document.getElementById('fromUnit');
+const toUnit = document.getElementById('toUnit');
+const fromVal = document.getElementById('fromVal');
+const toVal = document.getElementById('toVal');
+let cat = 'length';
+
+function populate() {
+  const opts = cat === 'temperature' ? ['C','F','K'] : Object.keys(UNITS[cat]);
+  fromUnit.innerHTML = opts.map(u => `<option>${u}</option>`).join('');
+  toUnit.innerHTML = opts.map((u,i) => `<option ${i===1?'selected':''}>${u}</option>`).join('');
+  convert();
+}
+
+function toCelsius(v, u) { return u === 'C' ? v : u === 'F' ? (v-32)*5/9 : v-273.15; }
+function fromCelsius(c, u) { return u === 'C' ? c : u === 'F' ? c*9/5+32 : c+273.15; }
+
+function convert() {
+  const v = parseFloat(fromVal.value);
+  if (Number.isNaN(v)) { toVal.value = ''; return; }
+  if (cat === 'temperature') {
+    toVal.value = Math.round(fromCelsius(toCelsius(v, fromUnit.value), toUnit.value) * 1000) / 1000;
+  } else {
+    const base = v * UNITS[cat][fromUnit.value];
+    toVal.value = Math.round((base / UNITS[cat][toUnit.value]) * 1e6) / 1e6;
+  }
+}
+
+catbar.addEventListener('click', e => {
+  const btn = e.target.closest('.pill'); if (!btn) return;
+  catbar.querySelectorAll('.pill').forEach(p => p.setAttribute('aria-pressed','false'));
+  btn.setAttribute('aria-pressed','true');
+  cat = btn.dataset.cat;
+  populate();
+});
+[fromVal, fromUnit, toUnit].forEach(el => el.addEventListener('input', convert));
+populate();
+</script>
+</body>
+</html>

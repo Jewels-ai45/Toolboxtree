@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Free Online Tools | ToolboxTree</title>
+<meta name="description" content="Browse every free ToolboxTree tool: calculators, PDF, image, text, conversion and finance tools.">
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-nav="tools">
+<div id="site-nav"></div>
+
+<main class="section container">
+  <div class="section-head" style="margin-bottom:28px;">
+    <h1 style="font-size:1.9rem;">Explore all free tools</h1>
+    <p>Search or filter by category — every tool runs in your browser.</p>
+  </div>
+
+  <div style="max-width:640px; margin:0 auto 28px;">
+    <input id="search" type="search" placeholder="Search for free tools..." aria-label="Search tools"
+      style="width:100%; padding:14px 18px; border-radius:999px; border:1px solid var(--border-strong); font-size:0.95rem;">
+  </div>
+
+  <div class="pillbar text-center" id="pillbar" style="justify-content:center; margin-bottom:36px;"></div>
+
+  <div class="grid" id="tool-grid"></div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="js/include.js"></script>
+<script>
+const TOOLS = [
+  { cat: 'utility', badge: 'Utility', icon: '🧮', bg:'#e3f5f2', name: 'Free Online Calculator', href: 'pages/calculator.html',
+    desc: 'A fast, reliable free online calculator for everyday arithmetic.' },
+  { cat: 'utility', badge: 'Utility', icon: '📅', bg:'#eaecfb', name: 'Interactive Calendar Tool', href: 'calendar.html',
+    desc: 'Navigate dates, find days of the week, and plan your schedule.' },
+  { cat: 'pdf', badge: 'PDF', icon: '📄', bg:'#e3f5f2', name: 'Free PDF Tools', href: 'pages/pdf-tools.html',
+    desc: 'Merge, split and compress PDFs — processed in your browser.' },
+  { cat: 'finance', badge: 'Finance', icon: '🏠', bg:'#e9f6ec', name: 'Loan & Interest Calculator', href: 'pages/loan-calculator.html',
+    desc: 'Work out repayments and total interest on a loan.' },
+  { cat: 'text', badge: 'Text', icon: '🔤', bg:'#fdf3e0', name: 'Word Counter', href: 'pages/word-counter.html',
+    desc: 'Count words, characters, sentences and reading time.' },
+  { cat: 'image', badge: 'Image', icon: '🖼️', bg:'#f2e9fb', name: 'Image Compressor', href: 'pages/image-tools.html',
+    desc: 'Shrink image file size without losing noticeable quality.' },
+  { cat: 'conversion', badge: 'Conversion', icon: '⚖️', bg:'#fdeaea', name: 'Unit Converter', href: 'pages/unit-converter.html',
+    desc: 'Convert length, weight, temperature and volume instantly.' },
+  { cat: 'utility', badge: 'Utility', icon: '%', bg:'#f2e9fb', name: 'Percentage Calculator', href: 'pages/percentage.html',
+    desc: 'Find percentages, ratios and percentage change in seconds.' },
+  { cat: 'utility', badge: 'Utility', icon: '🩺', bg:'#e9f6ec', name: 'BMI Calculator', href: 'pages/bmi.html',
+    desc: 'Calculate Body Mass Index in metric or imperial units.' },
+  { cat: 'finance', badge: 'Finance', icon: '💸', bg:'#e3f5f2', name: 'Tip Calculator', href: 'pages/tip.html',
+    desc: 'Work out the tip and split the bill in seconds.' },
+  { cat: 'utility', badge: 'Utility', icon: '▦', bg:'#eaecfb', name: 'QR Code Generator', href: 'pages/qr-code.html',
+    desc: 'Turn any link or text into a scannable QR code instantly.' },
+];
+
+const CATS = ['all','finance','text','pdf','image','conversion','utility'];
+const pillbar = document.getElementById('pillbar');
+pillbar.innerHTML = CATS.map(c => `<button class="pill" data-cat="${c}" aria-pressed="${c==='all'}">${c[0].toUpperCase()+c.slice(1)}</button>`).join('');
+
+function render() {
+  const activeCat = pillbar.querySelector('[aria-pressed="true"]').dataset.cat;
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const list = TOOLS.filter(t =>
+    (activeCat === 'all' || t.cat === activeCat) &&
+    (t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q))
+  );
+  document.getElementById('tool-grid').innerHTML = list.length ? list.map(t => `
+    <div class="card tool-card">
+      <div class="tool-icon" style="background:${t.bg}">${t.icon}</div>
+      <span class="badge" style="align-self:flex-end; margin-top:-40px;">${t.badge}</span>
+      <h3>${t.name}</h3>
+      <p>${t.desc}</p>
+      <a href="${t.href}" class="btn btn-primary">Open ${t.name}</a>
+    </div>`).join('') : `<p class="text-center" style="grid-column:1/-1;">No tools match that search yet.</p>`;
+}
+
+pillbar.addEventListener('click', e => {
+  const btn = e.target.closest('.pill');
+  if (!btn) return;
+  pillbar.querySelectorAll('.pill').forEach(p => p.setAttribute('aria-pressed', 'false'));
+  btn.setAttribute('aria-pressed', 'true');
+  render();
+});
+document.getElementById('search').addEventListener('input', render);
+
+// Pre-select category from ?cat= link (used by homepage tree)
+const initialCat = new URLSearchParams(location.search).get('cat');
+if (initialCat && CATS.includes(initialCat)) {
+  pillbar.querySelectorAll('.pill').forEach(p => p.setAttribute('aria-pressed', p.dataset.cat === initialCat ? 'true' : 'false'));
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+/* Page-specific styles that sit on top of styles.css */
+
+/* ---------- Homepage tree diagram (the site's signature element) ---------- */
+.tree-wrap {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 50px 0 20px;
+}
+.tree-svg { width: 100%; height: auto; }
+.tree-svg .branch {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 2;
+  stroke-dasharray: 5 6;
+  stroke-linecap: round;
+}
+.tree-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 132px;
+  text-align: center;
+}
+.tree-node a {
+  display: block;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 10px 14px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.tree-node a:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--teal-500);
+}
+.tree-node .ic {
+  width: 40px; height: 40px; margin: 0 auto 8px;
+  border-radius: 11px; display: flex; align-items: center; justify-content: center;
+}
+.tree-node span.label { font-weight: 700; font-size: 0.84rem; color: var(--navy); }
+.tree-center {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 152px; height: 152px; border-radius: 50%;
+  background: linear-gradient(160deg, var(--teal-600), var(--navy));
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  text-align: center; font-family: var(--font-display); font-weight: 800; font-size: 1.15rem;
+  box-shadow: var(--shadow-lg);
+}
+.tree-hint { text-align: center; color: var(--faint); font-style: italic; font-size: 0.9rem; margin-top: 8px; }
+
+@media (max-width: 720px) {
+  .tree-wrap { display: none; }
+  .tree-mobile-grid { display: grid !important; }
+}
+.tree-mobile-grid { display: none; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.tree-mobile-grid a {
+  background: #fff; border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px; text-align: center; font-weight: 700; font-size: 0.85rem; color: var(--navy);
+}
+.tree-mobile-grid .ic { width: 34px; height: 34px; margin: 0 auto 6px; border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+
+/* ---------- Planner shell ---------- */
+.planner-shell { display: grid; grid-template-columns: 240px 1fr; gap: 32px; align-items: start; padding: 40px 0 80px; }
+.planner-nav { position: sticky; top: 90px; display: grid; gap: 4px; }
+.planner-nav .kicker { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--faint); font-weight: 700; margin-bottom: 8px; padding-left: 14px; }
+.planner-nav a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: 12px; font-weight: 600; color: var(--navy); font-size: 0.94rem;
+}
+.planner-nav a:hover { background: var(--teal-50); }
+.planner-nav a[aria-current="page"] { background: var(--teal-700); color: #fff; }
+.planner-main { display: grid; gap: 24px; }
+.notice {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--teal-50); border: 1px solid var(--teal-100);
+  color: var(--teal-700); font-size: 0.88rem; font-weight: 600;
+  padding: 12px 16px; border-radius: 12px;
+}
+.notice .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal-600); }
+
+.checklist-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.checklist-row:last-of-type { border-bottom: none; }
+.checklist-row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--teal-700); }
+.checklist-row label { font-weight: 500; }
+.checklist-row.done label { color: var(--faint); text-decoration: line-through; }
+
+.field-row { display: flex; gap: 10px; margin-top: 14px; }
+.field-row input, .field-row textarea {
+  flex: 1; border: 1px solid var(--border-strong); border-radius: 10px;
+  padding: 11px 14px; font-family: var(--font-body); font-size: 0.94rem; background: #fcfdfd;
+}
+.field-row textarea { resize: vertical; min-height: 90px; }
+
+.card-head { display: flex; align-items: center; justify-content: between; gap: 10px; }
+.card-head .count { margin-left: auto; font-size: 0.85rem; color: var(--faint); font-weight: 700; }
+
+.matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+.matrix-quad { border-radius: 14px; padding: 16px; min-height: 120px; }
+.matrix-quad h4 { font-size: 0.92rem; margin-bottom: 2px; }
+.matrix-quad .tag { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+.matrix-quad .empty { color: var(--faint); font-style: italic; font-size: 0.85rem; margin-top: 10px; }
+.matrix-quad.do { background: #e8f6f1; }
+.matrix-quad.schedule { background: #eaf1fb; }
+.matrix-quad.delegate { background: #fdf3e0; }
+.matrix-quad.delete { background: #fbeaea; }
+@media (max-width: 560px) { .matrix { grid-template-columns: 1fr; } }
+
+.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.stat-box { background: var(--teal-50); border-radius: 14px; padding: 18px; text-align: center; }
+.stat-box .num { font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; color: var(--navy); }
+.stat-box .lab { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 700; margin-top: 4px; }
+
+/* Growth tab: tree-ring progress instead of a generic bar, ties to brand */
+.ring-progress { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.ring-progress svg { flex-shrink: 0; }
+.ring-amount { font-family: var(--font-display); font-size: 2.1rem; font-weight: 800; color: var(--navy); }
+.ring-goal { color: var(--muted); font-size: 0.9rem; }
+
+.upgrade-card {
+  background: linear-gradient(155deg, var(--gold-100), #fff);
+  border: 1px solid #f1ddaa;
+}
+.upgrade-card h3 { display: flex; align-items: center; gap: 8px; }
+.upgrade-card ul { padding-left: 20px; color: var(--muted); margin: 14px 0 20px; }
+.upgrade-card li { margin-bottom: 6px; }
+.price-tag { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; color: var(--gold-700); }
+
+/* ---------- Simple tool widgets (calculator etc.) ---------- */
+.tool-widget { max-width: 480px; margin: 0 auto; }
+.calc-display {
+  background: var(--navy); color: #fff; font-family: var(--font-display);
+  font-size: 2.2rem; font-weight: 700; text-align: right;
+  border-radius: 16px; padding: 22px 20px; margin-bottom: 14px; overflow-x: auto;
+}
+.calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.calc-grid button {
+  padding: 18px 0; border-radius: 12px; border: 1px solid var(--border);
+  background: #fff; font-size: 1.1rem; font-weight: 700; cursor: pointer; color: var(--navy);
+}
+.calc-grid button:hover { background: var(--teal-50); }
+.calc-grid button.op { background: var(--teal-100); color: var(--teal-700); }
+.calc-grid button.eq { background: var(--teal-700); color: #fff; grid-column: span 2; }
+.calc-grid button.clear { background: #fbeaea; color: var(--danger); }
+
+.result-box {
+  background: var(--teal-50); border: 1px solid var(--teal-100); border-radius: 14px;
+  padding: 20px; margin-top: 20px; text-align: center;
+}
+.result-box .big { font-family: var(--font-display); font-size: 2rem; font-weight: 800; color: var(--teal-700); }
+
+.coming-soon-box { text-align: center; padding: 60px 24px; }
