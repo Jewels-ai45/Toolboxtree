@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Online Calculator | ToolboxTree</title>
+<meta name="description" content="A fast, free online calculator with a scientific mode and calculation history — everyday arithmetic, done instantly in your browser.">
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+<style>
+  .calc-layout { display: grid; grid-template-columns: 1fr 280px; gap: 28px; align-items: start; max-width: 780px; margin: 0 auto; }
+  @media (max-width: 760px) { .calc-layout { grid-template-columns: 1fr; max-width: 420px; } }
+
+  .mode-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
+  .mode-toggle button {
+    flex: 1; padding: 10px 0; border-radius: 999px; border: 1px solid var(--border-strong);
+    background: #fff; font-weight: 700; font-size: 0.88rem; cursor: pointer; color: var(--navy);
+  }
+  .mode-toggle button[aria-pressed="true"] { background: var(--teal-700); color: #fff; border-color: var(--teal-700); }
+
+  .calc-display .prev-expr { display: block; font-size: 0.95rem; font-weight: 500; color: #9fb9b5; text-align: right; min-height: 1.3em; overflow-x: auto; }
+
+  .calc-grid.sci { grid-template-columns: repeat(5, 1fr); }
+  .calc-grid button.fn { background: var(--teal-50); color: var(--teal-700); font-size: 0.92rem; }
+  .calc-grid button.fn:hover { background: var(--teal-100); }
+
+  .history-panel {
+    background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 20px; max-height: 480px; display: flex; flex-direction: column;
+  }
+  .history-panel .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .history-panel h3 { margin: 0; font-size: 1rem; }
+  .history-panel button.clear-hist { background: none; border: none; color: var(--faint); font-size: 0.8rem; cursor: pointer; font-weight: 600; }
+  .history-panel button.clear-hist:hover { color: var(--danger); }
+  .history-list { overflow-y: auto; display: grid; gap: 2px; }
+  .history-item { padding: 10px 8px; border-radius: 10px; cursor: pointer; }
+  .history-item:hover { background: var(--teal-50); }
+  .history-item .expr { font-size: 0.82rem; color: var(--muted); }
+  .history-item .res { font-weight: 700; color: var(--navy); font-family: var(--font-display); }
+  .history-empty { color: var(--faint); font-size: 0.88rem; font-style: italic; padding: 10px 8px; }
+
+  .converter-link {
+    display: flex; align-items: center; gap: 10px; margin-top: 16px;
+    padding: 14px; border-radius: 14px; background: var(--teal-50); border: 1px solid var(--teal-100);
+    font-weight: 700; font-size: 0.88rem; color: var(--teal-700);
+  }
+  .converter-link span.arrow { margin-left: auto; }
+
+  @media (max-width: 760px) { .history-panel { max-height: 220px; } }
+</style>
+</head>
+<body data-root="../" data-nav="tools">
+<div id="site-nav"></div>
+
+<main class="section container">
+  <div class="section-head">
+    <h1 style="font-size:1.8rem;">Free Online Calculator</h1>
+    <p>Everyday arithmetic and scientific functions, with a running history. Nothing you type is stored anywhere but your own browser.</p>
+  </div>
+
+  <div class="calc-layout">
+    <div class="tool-widget" style="max-width:none;">
+      <div class="mode-toggle">
+        <button data-mode="basic" aria-pressed="true">Basic</button>
+        <button data-mode="scientific" aria-pressed="false">Scientific</button>
+      </div>
+
+      <div class="calc-display">
+        <span class="prev-expr" id="prevExpr">&nbsp;</span>
+        <span id="display">0</span>
+      </div>
+
+      <div class="calc-grid" id="calcGrid"></div>
+
+      <a href="unit-converter.html" class="converter-link">
+        ⇄ Need to convert units instead? Open the Unit Converter <span class="arrow">→</span>
+      </a>
+    </div>
+
+    <div class="history-panel">
+      <div class="head">
+        <h3>History</h3>
+        <button class="clear-hist" id="clearHistory">Clear</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+
+  <div class="container" style="margin-top:48px; max-width:680px;">
+    <h2 style="font-size:1.2rem;">Use cases</h2>
+    <ul style="color:var(--muted);">
+      <li>Quickly balancing personal budgets</li>
+      <li>Solving math or science homework, in Scientific mode</li>
+      <li>Checking totals before a purchase</li>
+    </ul>
+  </div>
+  <div class="container" style="max-width:680px;"><div class="ad-slot" aria-hidden="true"></div></div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+<script>
+let expr = '';
+let mode = 'basic';
+const display = document.getElementById('display');
+const prevExpr = document.getElementById('prevExpr');
+const calcGrid = document.getElementById('calcGrid');
+
+const BASIC_ROWS = `
+  <button class="clear" data-act="clear">AC</button>
+  <button class="op" data-act="sign">±</button>
+  <button class="op" data-act="percent">%</button>
+  <button class="op" data-val="/">÷</button>
+
+  <button data-val="7">7</button>
+  <button data-val="8">8</button>
+  <button data-val="9">9</button>
+  <button class="op" data-val="*">×</button>
+
+  <button data-val="4">4</button>
+  <button data-val="5">5</button>
+  <button data-val="6">6</button>
+  <button class="op" data-val="-">−</button>
+
+  <button data-val="1">1</button>
+  <button data-val="2">2</button>
+  <button data-val="3">3</button>
+  <button class="op" data-val="+">+</button>
+
+  <button data-val="0" style="grid-column:span 2;">0</button>
+  <button data-val=".">.</button>
+  <button class="eq" data-act="equals">=</button>
+`;
+
+const SCI_EXTRA_ROWS = `
+  <button class="fn" data-fn="sin">sin</button>
+  <button class="fn" data-fn="cos">cos</button>
+  <button class="fn" data-fn="tan">tan</button>
+  <button class="fn" data-fn="log">log</button>
+  <button class="fn" data-fn="ln">ln</button>
+
+  <button class="fn" data-fn="sqrt">√</button>
+  <button class="fn" data-val="**2">x²</button>
+  <button class="fn" data-val="**">xʸ</button>
+  <button class="fn" data-val="(">(</button>
+  <button class="fn" data-val=")">)</button>
+
+  <button class="fn" data-val="Math.PI">π</button>
+  <button class="fn" data-val="Math.E">e</button>
+  <button class="fn" data-fn="inv">1/x</button>
+  <button class="fn" data-fn="fact">n!</button>
+  <button class="fn" data-act="backspace">⌫</button>
+`;
+
+function renderGrid() {
+  calcGrid.className = 'calc-grid' + (mode === 'scientific' ? ' sci' : '');
+  calcGrid.innerHTML = (mode === 'scientific' ? SCI_EXTRA_ROWS : '') + BASIC_ROWS;
+}
+
+document.querySelectorAll('.mode-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-toggle button').forEach(b => b.setAttribute('aria-pressed', 'false'));
+    btn.setAttribute('aria-pressed', 'true');
+    mode = btn.dataset.mode;
+    renderGrid();
+  });
+});
+renderGrid();
+
+function update() { display.textContent = expr || '0'; }
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem('tbt_calcHistory') || '[]'); } catch { return []; }
+}
+function saveHistory(list) { localStorage.setItem('tbt_calcHistory', JSON.stringify(list)); }
+
+function renderHistory() {
+  const list = loadHistory();
+  const el = document.getElementById('historyList');
+  el.innerHTML = list.length
+    ? list.slice().reverse().map(h => `
+      <div class="history-item" data-result="${h.result}">
+        <div class="expr">${h.expr}</div>
+        <div class="res">= ${h.result}</div>
+      </div>`).join('')
+    : `<div class="history-empty">No calculations yet — your history will appear here.</div>`;
+}
+renderHistory();
+
+document.getElementById('historyList').addEventListener('click', e => {
+  const item = e.target.closest('.history-item');
+  if (!item) return;
+  expr = item.dataset.result;
+  update();
+});
+document.getElementById('clearHistory').addEventListener('click', () => {
+  saveHistory([]);
+  renderHistory();
+});
+
+function factorial(n) {
+  if (n < 0 || !Number.isInteger(n)) return NaN;
+  let r = 1; for (let i = 2; i <= n; i++) r *= i;
+  return r;
+}
+
+calcGrid.addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const { act, val, fn } = btn.dataset;
+
+  if (fn) {
+    const m = expr.match(/(-?\d*\.?\d+)$/);
+    const num = m ? parseFloat(m[0]) : null;
+    if (fn === 'sin' || fn === 'cos' || fn === 'tan') {
+      expr += `Math.${fn}(`;
+    } else if (fn === 'log') {
+      expr += `Math.log10(`;
+    } else if (fn === 'ln') {
+      expr += `Math.log(`;
+    } else if (fn === 'sqrt') {
+      expr += `Math.sqrt(`;
+    } else if (fn === 'inv' && num !== null) {
+      expr = expr.slice(0, m.index) + `(1/${num})`;
+    } else if (fn === 'fact' && num !== null) {
+      expr = expr.slice(0, m.index) + factorial(num);
+    } else if (fn === 'backspace') {
+      expr = expr.slice(0, -1);
+    }
+    update();
+    return;
+  }
+
+  if (val !== undefined) { expr += val; update(); return; }
+
+  if (act === 'clear') { expr = ''; prevExpr.innerHTML = '&nbsp;'; update(); return; }
+  if (act === 'sign') {
+    const m = expr.match(/(-?\d*\.?\d+)$/);
+    if (m) expr = expr.slice(0, m.index) + (m[0].startsWith('-') ? m[0].slice(1) : '-' + m[0]);
+    update(); return;
+  }
+  if (act === 'percent') {
+    const m = expr.match(/(-?\d*\.?\d+)$/);
+    if (m) expr = expr.slice(0, m.index) + (parseFloat(m[0]) / 100);
+    update(); return;
+  }
+  if (act === 'backspace') { expr = expr.slice(0, -1); update(); return; }
+  if (act === 'equals') {
+    const original = expr;
+    try {
+      if (/^[0-9+\-*/.() \sA-Za-z]*$/.test(expr)) {
+        const result = Function('"use strict";return (' + expr + ')')();
+        if (Number.isFinite(result)) {
+          expr = String(Math.round(result * 1e10) / 1e10);
+          const hist = loadHistory();
+          hist.push({ expr: original, result: expr });
+          saveHistory(hist.slice(-50));
+          renderHistory();
+        } else { expr = 'Error'; }
+      } else { expr = 'Error'; }
+    } catch { expr = 'Error'; }
+    prevExpr.textContent = original + ' =';
+    update();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (/[0-9.+\-*/]/.test(e.key)) { expr += e.key; update(); }
+  else if (e.key === 'Enter' || e.key === '=') { document.querySelector('[data-act="equals"]').click(); }
+  else if (e.key === 'Backspace') { expr = expr.slice(0, -1); update(); }
+  else if (e.key === 'Escape') { expr = ''; update(); }
+});
+</script>
+</body>
+</html>
