@@ -67,4 +67,173 @@
     <h3 style="margin-bottom:10px;">FAQ</h3>
     <div style="display:grid; gap:14px; font-size:0.92rem;">
       <div><strong style="color:var(--navy);">Are my PDFs uploaded to a server?</strong><p style="margin:4px 0 0;">No. Every operation — merging, splitting and compressing — runs entirely in your browser using JavaScript. Your files never leave your device.</p></div>
-      <div><strong style="color:var(--navy);">Is there a file size or page limit?</strong><p style="margin:4px 0 0;">No hard limit is enforced, but very large PDFs (100+ MB) may be slow since your device's memory and processor handle everything, rather than a
+      <div><strong style="color:var(--navy);">Is there a file size or page limit?</strong><p style="margin:4px 0 0;">No hard limit is enforced, but very large PDFs (100+ MB) may be slow since your device's memory and processor handle everything, rather than a server.</p></div>
+      <div><strong style="color:var(--navy);">Why didn't compress shrink my file much?</strong><p style="margin:4px 0 0;">If your PDF is mostly scanned pages or high-resolution images, most of the file size is the images themselves, which this tool doesn't re-encode. It works best on text-based and annotated PDFs.</p></div>
+      <div><strong style="color:var(--navy);">Can I merge password-protected PDFs?</strong><p style="margin:4px 0 0;">Encrypted or password-protected PDFs may fail to process. Remove the password first using your PDF viewer, then try again.</p></div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+<script>
+const { PDFDocument } = PDFLib;
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function showResult(el, html) {
+  el.style.display = 'block';
+  el.innerHTML = html;
+}
+
+/* ---------- Tab switching ---------- */
+const pillbar = document.getElementById('pdfPillbar');
+const panels = { merge: 'panel-merge', split: 'panel-split', compress: 'panel-compress' };
+pillbar.addEventListener('click', e => {
+  const btn = e.target.closest('.pill');
+  if (!btn) return;
+  pillbar.querySelectorAll('.pill').forEach(p => p.setAttribute('aria-pressed', 'false'));
+  btn.setAttribute('aria-pressed', 'true');
+  Object.values(panels).forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById(panels[btn.dataset.tab]).style.display = 'block';
+});
+
+/* ---------- Merge ---------- */
+const mergeFiles = document.getElementById('mergeFiles');
+const mergeList = document.getElementById('mergeList');
+const mergeBtn = document.getElementById('mergeBtn');
+const mergeResult = document.getElementById('mergeResult');
+
+mergeFiles.addEventListener('change', () => {
+  const files = Array.from(mergeFiles.files);
+  mergeList.innerHTML = files.map((f, i) => `${i + 1}. ${f.name} (${formatBytes(f.size)})`).join('<br>');
+  mergeBtn.disabled = files.length < 2;
+  mergeResult.style.display = 'none';
+});
+
+mergeBtn.addEventListener('click', async () => {
+  mergeBtn.disabled = true;
+  mergeBtn.textContent = 'Merging…';
+  try {
+    const files = Array.from(mergeFiles.files);
+    const mergedPdf = await PDFDocument.create();
+    for (const file of files) {
+      const bytes = await file.arrayBuffer();
+      const src = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      const pages = await mergedPdf.copyPages(src, src.getPageIndices());
+      pages.forEach(p => mergedPdf.addPage(p));
+    }
+    const outBytes = await mergedPdf.save();
+    const blob = new Blob([outBytes], { type: 'application/pdf' });
+    showResult(mergeResult, `<div class="big" style="font-size:1.1rem;">✅ Merged ${files.length} files</div><p style="margin:8px 0 14px;">Output size: ${formatBytes(blob.size)}</p><button class="btn btn-primary" id="mergeDownload" type="button">Download merged.pdf</button>`);
+    document.getElementById('mergeDownload').addEventListener('click', () => downloadBlob(blob, 'merged.pdf'));
+  } catch (e) {
+    showResult(mergeResult, `<p style="color:var(--danger); margin:0;">Something went wrong merging those files — they may be encrypted or corrupted. Try a different file.</p>`);
+  }
+  mergeBtn.disabled = false;
+  mergeBtn.textContent = 'Merge PDFs';
+});
+
+/* ---------- Split ---------- */
+const splitFile = document.getElementById('splitFile');
+const splitInfo = document.getElementById('splitInfo');
+const splitRangeRow = document.getElementById('splitRangeRow');
+const splitFrom = document.getElementById('splitFrom');
+const splitTo = document.getElementById('splitTo');
+const splitBtn = document.getElementById('splitBtn');
+const splitResult = document.getElementById('splitResult');
+let splitPageCount = 0;
+
+splitFile.addEventListener('change', async () => {
+  splitResult.style.display = 'none';
+  const file = splitFile.files[0];
+  if (!file) { splitRangeRow.style.display = 'none'; splitBtn.disabled = true; return; }
+  try {
+    const bytes = await file.arrayBuffer();
+    const pdf = await PDFDocument.load(bytes, { ignoreEncryption: true });
+    splitPageCount = pdf.getPageCount();
+    splitInfo.textContent = `This PDF has ${splitPageCount} page${splitPageCount === 1 ? '' : 's'}.`;
+    splitFrom.min = 1; splitFrom.max = splitPageCount; splitFrom.value = 1;
+    splitTo.min = 1; splitTo.max = splitPageCount; splitTo.value = splitPageCount;
+    splitRangeRow.style.display = 'flex';
+    splitBtn.disabled = false;
+  } catch (e) {
+    splitInfo.textContent = "Couldn't read that PDF — it may be encrypted or corrupted.";
+    splitRangeRow.style.display = 'none';
+    splitBtn.disabled = true;
+  }
+});
+
+splitBtn.addEventListener('click', async () => {
+  splitBtn.disabled = true;
+  splitBtn.textContent = 'Extracting…';
+  try {
+    const file = splitFile.files[0];
+    const bytes = await file.arrayBuffer();
+    const src = await PDFDocument.load(bytes, { ignoreEncryption: true });
+    let from = Math.max(1, parseInt(splitFrom.value, 10) || 1);
+    let to = Math.min(splitPageCount, parseInt(splitTo.value, 10) || splitPageCount);
+    if (from > to) [from, to] = [to, from];
+    const indices = [];
+    for (let i = from; i <= to; i++) indices.push(i - 1);
+    const newPdf = await PDFDocument.create();
+    const pages = await newPdf.copyPages(src, indices);
+    pages.forEach(p => newPdf.addPage(p));
+    const outBytes = await newPdf.save();
+    const blob = new Blob([outBytes], { type: 'application/pdf' });
+    showResult(splitResult, `<div class="big" style="font-size:1.1rem;">✅ Extracted pages ${from}–${to}</div><p style="margin:8px 0 14px;">Output size: ${formatBytes(blob.size)}</p><button class="btn btn-primary" id="splitDownload" type="button">Download extracted.pdf</button>`);
+    document.getElementById('splitDownload').addEventListener('click', () => downloadBlob(blob, 'extracted.pdf'));
+  } catch (e) {
+    showResult(splitResult, `<p style="color:var(--danger); margin:0;">Something went wrong extracting those pages. Try a different range or file.</p>`);
+  }
+  splitBtn.disabled = false;
+  splitBtn.textContent = 'Extract pages';
+});
+
+/* ---------- Compress ---------- */
+const compressFile = document.getElementById('compressFile');
+const compressBtn = document.getElementById('compressBtn');
+const compressResult = document.getElementById('compressResult');
+
+compressFile.addEventListener('change', () => {
+  compressBtn.disabled = !compressFile.files[0];
+  compressResult.style.display = 'none';
+});
+
+compressBtn.addEventListener('click', async () => {
+  compressBtn.disabled = true;
+  compressBtn.textContent = 'Compressing…';
+  try {
+    const file = compressFile.files[0];
+    const originalSize = file.size;
+    const bytes = await file.arrayBuffer();
+    const pdf = await PDFDocument.load(bytes, { ignoreEncryption: true });
+    const outBytes = await pdf.save({ useObjectStreams: true });
+    const blob = new Blob([outBytes], { type: 'application/pdf' });
+    const savedPct = Math.max(0, Math.round((1 - blob.size / originalSize) * 100));
+    showResult(compressResult, `<div class="big" style="font-size:1.1rem;">✅ ${savedPct > 0 ? savedPct + '% smaller' : 'Compressed'}</div><p style="margin:8px 0 14px;">${formatBytes(originalSize)} → ${formatBytes(blob.size)}</p><button class="btn btn-primary" id="compressDownload" type="button">Download compressed.pdf</button>`);
+    document.getElementById('compressDownload').addEventListener('click', () => downloadBlob(blob, 'compressed.pdf'));
+  } catch (e) {
+    showResult(compressResult, `<p style="color:var(--danger); margin:0;">Something went wrong compressing that file — it may be encrypted or corrupted.</p>`);
+  }
+  compressBtn.disabled = false;
+  compressBtn.textContent = 'Compress PDF';
+});
+</script>
+</body>
+</html>
