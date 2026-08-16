@@ -32,8 +32,13 @@
     <div class="card" id="panel-merge">
       <h3 style="margin-bottom:6px;">Merge PDFs</h3>
       <p style="font-size:0.9rem; margin-bottom:16px;">Choose two or more PDFs — they'll be combined in the order you select them.</p>
+      <div style="display:flex; gap:8px; align-items:flex-start; background:var(--teal-50); border:1px solid var(--teal-100); border-radius:10px; padding:10px 12px; margin-bottom:12px; font-size:0.82rem; color:var(--teal-700);">
+        <span>💡</span>
+        <span><strong>Select all your files in one go:</strong> in the file picker window, hold <strong>Ctrl</strong> (Windows) or <strong>Cmd</strong> (Mac) and click each PDF, or hold <strong>Shift</strong> to select a range — then click Open.</span>
+      </div>
       <input type="file" id="mergeFiles" accept="application/pdf" multiple style="width:100%; padding:10px; border:1px solid var(--border-strong); border-radius:10px; background:var(--card); color:var(--ink);">
-      <div id="mergeList" style="margin-top:14px; display:grid; gap:8px; font-size:0.88rem; color:var(--muted);"></div>
+      <div id="mergeCount" style="margin-top:10px; font-size:0.85rem; color:var(--faint);"></div>
+      <div id="mergeList" style="margin-top:8px; display:grid; gap:8px; font-size:0.88rem; color:var(--muted);"></div>
       <button class="btn btn-primary btn-block" id="mergeBtn" type="button" style="margin-top:18px;" disabled>Merge PDFs</button>
       <div class="result-box" id="mergeResult" style="display:none; margin-top:18px;"></div>
     </div>
@@ -115,6 +120,7 @@ pillbar.addEventListener('click', e => {
 
 /* ---------- Merge ---------- */
 const mergeFiles = document.getElementById('mergeFiles');
+const mergeCount = document.getElementById('mergeCount');
 const mergeList = document.getElementById('mergeList');
 const mergeBtn = document.getElementById('mergeBtn');
 const mergeResult = document.getElementById('mergeResult');
@@ -122,6 +128,13 @@ const mergeResult = document.getElementById('mergeResult');
 mergeFiles.addEventListener('change', () => {
   const files = Array.from(mergeFiles.files);
   mergeList.innerHTML = files.map((f, i) => `${i + 1}. ${f.name} (${formatBytes(f.size)})`).join('<br>');
+  if (files.length === 0) {
+    mergeCount.textContent = '';
+  } else if (files.length === 1) {
+    mergeCount.textContent = '1 file selected — choose at least one more to merge (select them together in the file picker).';
+  } else {
+    mergeCount.textContent = `${files.length} files selected — ready to merge.`;
+  }
   mergeBtn.disabled = files.length < 2;
   mergeResult.style.display = 'none';
 });
