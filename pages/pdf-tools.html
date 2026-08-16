@@ -4,26 +4,67 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Free PDF Tools | ToolboxTree</title>
-<meta name="description" content="Merge, split and compress PDF files securely — processed entirely in your browser.">
+<meta name="description" content="Merge, split and compress PDF files securely — processed entirely in your browser. Nothing is ever uploaded to a server.">
 <link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/styles.css">
 <link rel="stylesheet" href="../css/site.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 </head>
 <body data-root="../" data-nav="tools">
 <div id="site-nav"></div>
 
 <main class="section container">
-  <div class="coming-soon-box card" style="max-width:560px; margin:0 auto;">
-    <div class="tool-icon" style="margin:0 auto 18px; background:#e3f5f2;">📄</div>
-    <h1 style="font-size:1.6rem;">Free PDF Tools</h1>
-    <p>Merge, split and compress PDF files securely — processed entirely in your browser.</p>
-    <p style="color:var(--faint); font-size:0.85rem;">This tool is being rebuilt on the new site — it'll be back shortly.</p>
-    <a href="../tools.html" class="btn btn-ghost" style="margin-top:8px;">Browse other tools</a>
+  <div class="section-head" style="margin-bottom:28px;">
+    <h1 style="font-size:1.8rem;">Free PDF Tools</h1>
+    <p>Merge, split and compress PDFs — everything runs locally in your browser. Your files are never uploaded anywhere.</p>
   </div>
-</main>
 
-<div id="site-footer"></div>
-<script src="../js/include.js"></script>
-</body>
-</html>
+  <div class="pillbar" id="pdfPillbar" style="justify-content:center; margin-bottom:28px;">
+    <button class="pill" data-tab="merge" aria-pressed="true">Merge</button>
+    <button class="pill" data-tab="split" aria-pressed="false">Split</button>
+    <button class="pill" data-tab="compress" aria-pressed="false">Compress</button>
+  </div>
+
+  <div class="tool-widget" style="max-width:560px;">
+
+    <!-- MERGE -->
+    <div class="card" id="panel-merge">
+      <h3 style="margin-bottom:6px;">Merge PDFs</h3>
+      <p style="font-size:0.9rem; margin-bottom:16px;">Choose two or more PDFs — they'll be combined in the order you select them.</p>
+      <input type="file" id="mergeFiles" accept="application/pdf" multiple style="width:100%; padding:10px; border:1px solid var(--border-strong); border-radius:10px; background:var(--card); color:var(--ink);">
+      <div id="mergeList" style="margin-top:14px; display:grid; gap:8px; font-size:0.88rem; color:var(--muted);"></div>
+      <button class="btn btn-primary btn-block" id="mergeBtn" type="button" style="margin-top:18px;" disabled>Merge PDFs</button>
+      <div class="result-box" id="mergeResult" style="display:none; margin-top:18px;"></div>
+    </div>
+
+    <!-- SPLIT -->
+    <div class="card" id="panel-split" style="display:none;">
+      <h3 style="margin-bottom:6px;">Split / extract pages</h3>
+      <p style="font-size:0.9rem; margin-bottom:16px;">Choose a PDF, then pick the page range you want pulled out into a new file.</p>
+      <input type="file" id="splitFile" accept="application/pdf" style="width:100%; padding:10px; border:1px solid var(--border-strong); border-radius:10px; background:var(--card); color:var(--ink);">
+      <div id="splitInfo" style="margin-top:12px; font-size:0.88rem; color:var(--muted);"></div>
+      <div class="field-row" id="splitRangeRow" style="display:none;">
+        <input type="number" id="splitFrom" placeholder="From page" min="1">
+        <input type="number" id="splitTo" placeholder="To page" min="1">
+      </div>
+      <button class="btn btn-primary btn-block" id="splitBtn" type="button" style="margin-top:18px;" disabled>Extract pages</button>
+      <div class="result-box" id="splitResult" style="display:none; margin-top:18px;"></div>
+    </div>
+
+    <!-- COMPRESS -->
+    <div class="card" id="panel-compress" style="display:none;">
+      <h3 style="margin-bottom:6px;">Compress a PDF</h3>
+      <p style="font-size:0.9rem; margin-bottom:16px;">Strips unused objects and re-packs the file structure. Works best on text-heavy or annotated PDFs — savings on scanned/image-heavy PDFs will be smaller.</p>
+      <input type="file" id="compressFile" accept="application/pdf" style="width:100%; padding:10px; border:1px solid var(--border-strong); border-radius:10px; background:var(--card); color:var(--ink);">
+      <button class="btn btn-primary btn-block" id="compressBtn" type="button" style="margin-top:18px;" disabled>Compress PDF</button>
+      <div class="result-box" id="compressResult" style="display:none; margin-top:18px;"></div>
+    </div>
+
+  </div>
+
+  <div class="card" style="max-width:560px; margin:32px auto 0;">
+    <h3 style="margin-bottom:10px;">FAQ</h3>
+    <div style="display:grid; gap:14px; font-size:0.92rem;">
+      <div><strong style="color:var(--navy);">Are my PDFs uploaded to a server?</strong><p style="margin:4px 0 0;">No. Every operation — merging, splitting and compressing — runs entirely in your browser using JavaScript. Your files never leave your device.</p></div>
+      <div><strong style="color:var(--navy);">Is there a file size or page limit?</strong><p style="margin:4px 0 0;">No hard limit is enforced, but very large PDFs (100+ MB) may be slow since your device's memory and processor handle everything, rather than a
