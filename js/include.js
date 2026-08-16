@@ -3,6 +3,14 @@
 // <body data-nav="tools"> to highlight the active link, and
 // <body data-root="../"> when the page lives one folder deep (e.g. /planner/).
 
+// Apply saved theme immediately (runs as soon as this script loads,
+// before nav injection) to minimize the flash of the wrong theme.
+try {
+  if (localStorage.getItem('tt-theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+} catch (e) { /* localStorage unavailable, default to light */ }
+
 (async function () {
   const root = document.body.getAttribute('data-root') || '';
   const activeKey = document.body.getAttribute('data-nav') || '';
@@ -40,4 +48,20 @@
   }
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      try {
+        if (isDark) {
+          document.documentElement.removeAttribute('data-theme');
+          localStorage.setItem('tt-theme', 'light');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('tt-theme', 'dark');
+        }
+      } catch (e) { /* localStorage unavailable */ }
+    });
+  }
 })();
