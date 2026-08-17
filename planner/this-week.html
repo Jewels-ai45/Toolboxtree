@@ -107,7 +107,7 @@ document.getElementById('addTask').addEventListener('click', () => {
   if (!text) return;
   const tasks = Store.get('tasks', []);
   if (!Store.isPremium() && tasks.length >= FREE_TASK_LIMIT) {
-    alert(`The free Planner holds up to ${FREE_TASK_LIMIT} tasks at once. Unlock the $14 Planner for unlimited tasks and 6-month history.`);
+    alert(`The free Planner holds up to ${FREE_TASK_LIMIT} tasks at once. Unlock the $10 Planner for unlimited tasks and 6-month history.`);
     return;
   }
   tasks.push({ id: Date.now(), text, q: null });
