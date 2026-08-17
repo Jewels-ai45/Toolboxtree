@@ -58,7 +58,7 @@ const FREE_GOAL_LIMIT = 3;
 
 function renderGoals() {
   const goals = Store.get('goals', [
-    { id: 1, text: 'Complete Gumroad profile and add Planner ($14)', progress: 0, steps: [] },
+    { id: 1, text: 'Example: Save $500 this quarter', progress: 0, steps: [{ text: 'Set up a separate savings account', done: false }] },
   ]);
   document.getElementById('goalCount').textContent = `${goals.length}/${Store.isPremium() ? '∞' : FREE_GOAL_LIMIT}`;
   document.getElementById('goalList').innerHTML = goals.map(g => `
@@ -121,7 +121,7 @@ document.getElementById('addGoal').addEventListener('click', () => {
   if (!text) return;
   const goals = Store.get('goals', []);
   if (!Store.isPremium() && goals.length >= FREE_GOAL_LIMIT) {
-    alert(`The free Planner tracks up to ${FREE_GOAL_LIMIT} active goals. Unlock the $14 Planner for unlimited goals.`);
+    alert(`The free Planner tracks up to ${FREE_GOAL_LIMIT} active goals. Unlock the $10 Planner for unlimited goals.`);
     return;
   }
   goals.push({ id: Date.now(), text, progress: 0, steps: [] });
