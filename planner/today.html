@@ -59,8 +59,8 @@ const FREE_HABIT_LIMIT = 5;
 
 function renderHabits() {
   const habits = Store.get('habits', [
-    { text: 'Eat half to one sliced cucumber daily', done: false },
-    { text: '1 toning exercise minimum daily', done: false },
+    { text: 'Drink 8 glasses of water', done: false },
+    { text: '10 minutes of movement', done: false },
   ]);
   const list = document.getElementById('habitList');
   list.innerHTML = habits.map((h, i) => `
@@ -74,6 +74,9 @@ function renderHabits() {
     cb.addEventListener('change', () => {
       habits[cb.dataset.i].done = cb.checked;
       Store.set('habits', habits);
+      const habitLog = Store.get('habitLog', {});
+      habitLog[Store.todayKey()] = habits.filter(h => h.done).length;
+      Store.set('habitLog', habitLog);
       renderHabits();
     });
   });
@@ -86,7 +89,7 @@ document.getElementById('addHabit').addEventListener('click', () => {
   if (!text) return;
   const habits = Store.get('habits', []);
   if (!Store.isPremium() && habits.length >= FREE_HABIT_LIMIT) {
-    alert(`The free Planner tracks up to ${FREE_HABIT_LIMIT} habits at a time. Unlock the $14 Planner for unlimited habits and goals.`);
+    alert(`The free Planner tracks up to ${FREE_HABIT_LIMIT} habits at a time. Unlock the $10 Planner for unlimited habits and goals.`);
     return;
   }
   habits.push({ text, done: false });
