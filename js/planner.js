@@ -1,5 +1,5 @@
 // Tiny localStorage wrapper shared by every Planner page.
-// Free tier = local-only storage, no account. Premium unlock (Gumroad $14)
+// Free tier = local-only storage, no account. Premium unlock (Gumroad $10)
 // is checked via a license flag set in localStorage by the future unlock flow.
 const Store = {
   get(key, fallback) {
