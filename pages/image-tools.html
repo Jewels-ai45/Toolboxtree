@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Image Tools | ToolboxTree</title>
-<meta name="description" content="Compress, resize and convert images without uploading them anywhere.">
+<title>Image Compressor | ToolboxTree</title>
+<meta name="description" content="Compress, resize and convert images without uploading them anywhere — free, private, and processed entirely in your browser.">
 <link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/styles.css">
@@ -14,16 +14,174 @@
 <div id="site-nav"></div>
 
 <main class="section container">
-  <div class="coming-soon-box card" style="max-width:560px; margin:0 auto;">
-    <div class="tool-icon" style="margin:0 auto 18px; background:#f2e9fb;">🖼️</div>
-    <h1 style="font-size:1.6rem;">Image Tools</h1>
-    <p>Compress, resize and convert images without uploading them anywhere.</p>
-    <p style="color:var(--faint); font-size:0.85rem;">This tool is being rebuilt on the new site — it'll be back shortly.</p>
-    <a href="../tools.html" class="btn btn-ghost" style="margin-top:8px;">Browse other tools</a>
+  <div class="section-head"><h1 style="font-size:1.8rem;">Image Compressor</h1><p>Shrink, resize or convert an image — processed on your device, never uploaded.</p></div>
+
+  <div class="tool-widget" style="max-width:560px;">
+    <div class="card">
+      <div id="dropZone" style="border:2px dashed var(--border-strong); border-radius:var(--radius-lg); padding:40px 20px; text-align:center; cursor:pointer; transition:border-color .15s ease;">
+        <div class="tool-icon" style="margin:0 auto 14px; background:#f2e9fb;">🖼️</div>
+        <p style="margin:0 0 6px; font-weight:600;">Click to choose an image, or drag one here</p>
+        <p style="margin:0; font-size:0.85rem; color:var(--faint);">JPG, PNG, WebP or GIF — nothing leaves your device</p>
+        <input type="file" id="fileInput" accept="image/*" style="display:none;">
+      </div>
+
+      <div id="editorWrap" style="display:none; margin-top:24px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+          <div style="text-align:center;">
+            <img id="origPreview" alt="Original image" style="max-width:100%; border-radius:10px; border:1px solid var(--border);">
+            <p style="font-size:0.8rem; color:var(--faint); margin:8px 0 0;">Original — <span id="origSize"></span></p>
+          </div>
+          <div style="text-align:center;">
+            <img id="outPreview" alt="Compressed result" style="max-width:100%; border-radius:10px; border:1px solid var(--border);">
+            <p style="font-size:0.8rem; color:var(--faint); margin:8px 0 0;">Result — <span id="outSize"></span> <span id="outSaved" style="color:var(--success); font-weight:600;"></span></p>
+          </div>
+        </div>
+
+        <label for="formatSelect" style="font-size:0.85rem; font-weight:600; color:var(--muted); display:block; margin-bottom:6px;">Output format</label>
+        <select id="formatSelect" style="width:100%; padding:11px 14px; border-radius:10px; border:1px solid var(--border-strong); background:var(--card); color:var(--ink); margin-bottom:18px;">
+          <option value="image/jpeg">JPEG (smallest, best for photos)</option>
+          <option value="image/webp">WebP (smaller, modern browsers)</option>
+          <option value="image/png">PNG (lossless, larger)</option>
+        </select>
+
+        <div id="qualityWrap">
+          <label style="display:block; margin-bottom:6px;">Quality: <strong id="qualityLabel">80%</strong></label>
+          <input type="range" id="qualitySlider" min="10" max="100" value="80" style="width:100%; accent-color:var(--teal-700);">
+        </div>
+
+        <label for="maxWidth" style="font-size:0.85rem; font-weight:600; color:var(--muted); display:block; margin:18px 0 6px;">Max width in pixels (optional)</label>
+        <input type="number" id="maxWidth" placeholder="Leave blank to keep original size" style="width:100%; border:1px solid var(--border-strong); border-radius:10px; padding:11px 14px; background:var(--card); color:var(--ink);">
+
+        <button class="btn btn-primary btn-block" id="downloadBtn" type="button" style="margin-top:22px;">Download compressed image</button>
+        <button class="btn btn-ghost btn-block" id="resetBtn" type="button" style="margin-top:10px;">Choose a different image</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="max-width:560px; margin:32px auto 0;">
+    <h3 style="margin-bottom:10px;">FAQ</h3>
+    <div style="display:grid; gap:14px; font-size:0.92rem;">
+      <div><strong style="color:var(--navy);">Is my image uploaded anywhere?</strong><p style="margin:4px 0 0;">No. The whole process — reading, resizing and compressing — happens locally in your browser using the canvas API. Your image is never sent to a server.</p></div>
+      <div><strong style="color:var(--navy);">JPEG, WebP or PNG — which should I pick?</strong><p style="margin:4px 0 0;">JPEG is the smallest option for photos. WebP usually compresses even smaller at the same quality and is supported by all modern browsers. PNG is lossless (no quality slider) so it stays larger, but it's the right choice for graphics with transparency or sharp edges like logos and screenshots.</p></div>
+      <div><strong style="color:var(--navy);">Why is the quality slider greyed out?</strong><p style="margin:4px 0 0;">PNG is a lossless format, so there's no quality setting to adjust — you'll only see file-size savings from PNG if you also reduce the max width.</p></div>
+    </div>
   </div>
 </main>
 
 <div id="site-footer"></div>
 <script src="../js/include.js"></script>
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const editorWrap = document.getElementById('editorWrap');
+const origPreview = document.getElementById('origPreview');
+const outPreview = document.getElementById('outPreview');
+const origSizeEl = document.getElementById('origSize');
+const outSizeEl = document.getElementById('outSize');
+const outSavedEl = document.getElementById('outSaved');
+const formatSelect = document.getElementById('formatSelect');
+const qualitySlider = document.getElementById('qualitySlider');
+const qualityLabel = document.getElementById('qualityLabel');
+const qualityWrap = document.getElementById('qualityWrap');
+const maxWidthInput = document.getElementById('maxWidth');
+const downloadBtn = document.getElementById('downloadBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+let img = null;
+let originalBytes = 0;
+let outputBlob = null;
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+}
+
+function loadFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  originalBytes = file.size;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    img = new Image();
+    img.onload = () => {
+      origPreview.src = e.target.result;
+      origSizeEl.textContent = `${formatBytes(originalBytes)} · ${img.width}×${img.height}`;
+      editorWrap.style.display = 'block';
+      process();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function process() {
+  if (!img) return;
+  let w = img.width, h = img.height;
+  const mw = parseInt(maxWidthInput.value, 10);
+  if (mw && mw > 0 && mw < w) {
+    h = Math.round(h * (mw / w));
+    w = mw;
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  if (formatSelect.value === 'image/jpeg') {
+    // JPEG has no transparency — flatten onto white first
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, w, h);
+  }
+  ctx.drawImage(img, 0, 0, w, h);
+
+  const isLossy = formatSelect.value !== 'image/png';
+  qualityWrap.style.opacity = isLossy ? '1' : '0.4';
+  qualitySlider.disabled = !isLossy;
+  const quality = parseInt(qualitySlider.value, 10) / 100;
+
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    outputBlob = blob;
+    outPreview.src = URL.createObjectURL(blob);
+    outSizeEl.textContent = `${formatBytes(blob.size)} · ${w}×${h}`;
+    const diff = originalBytes - blob.size;
+    outSavedEl.textContent = diff > 0 ? `(saved ${Math.round((diff / originalBytes) * 100)}%)` : '';
+  }, formatSelect.value, isLossy ? quality : undefined);
+}
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--teal-500)'; });
+dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'var(--border-strong)'; });
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.style.borderColor = 'var(--border-strong)';
+  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => loadFile(fileInput.files[0]));
+
+formatSelect.addEventListener('change', process);
+qualitySlider.addEventListener('input', () => { qualityLabel.textContent = qualitySlider.value + '%'; process(); });
+
+let mwTimer;
+maxWidthInput.addEventListener('input', () => { clearTimeout(mwTimer); mwTimer = setTimeout(process, 300); });
+
+downloadBtn.addEventListener('click', () => {
+  if (!outputBlob) return;
+  const ext = formatSelect.value.split('/')[1].replace('jpeg', 'jpg');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(outputBlob);
+  a.download = `toolboxtree-image.${ext}`;
+  a.click();
+});
+
+resetBtn.addEventListener('click', () => {
+  img = null;
+  originalBytes = 0;
+  outputBlob = null;
+  editorWrap.style.display = 'none';
+  fileInput.value = '';
+  maxWidthInput.value = '';
+});
+</script>
 </body>
 </html>
