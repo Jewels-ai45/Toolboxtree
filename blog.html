@@ -21,13 +21,11 @@
 <div id="site-footer"></div>
 <script src="js/include.js"></script>
 <script>
-// One real post published so far; the other two are honest placeholders
-// until they're written. Keeping the page content-rich (not just tool +
-// 2 bullets) helps with AdSense approval.
+// All three posts are now written and live.
 const posts = [
   { title: 'How to split a PDF without installing anything', excerpt: 'A quick walkthrough of ToolboxTree\'s free PDF splitter — no software, no watermark.', tag: 'PDF', href: 'blog/how-to-split-a-pdf.html' },
-  { title: '5 percentage calculations everyone should know', excerpt: 'Tips, discounts, raises and more — the mental math shortcuts worth learning.', tag: 'Finance', href: null },
-  { title: 'Setting a weekly priority list that actually sticks', excerpt: 'Why three priorities beats a ten-item to-do list, and how the Planner\'s task matrix helps.', tag: 'Productivity', href: null },
+  { title: '5 percentage calculations everyone should know', excerpt: 'Tips, discounts, raises and more — the mental math shortcuts worth learning.', tag: 'Finance', href: 'blog/percentage-calculations-everyone-should-know.html' },
+  { title: 'Setting a weekly priority list that actually sticks', excerpt: 'Why three priorities beats a ten-item to-do list, and how the Planner\'s task matrix helps.', tag: 'Productivity', href: 'blog/weekly-priority-list-that-sticks.html' },
 ];
 document.getElementById('postGrid').innerHTML = posts.map(p => `
   <div class="card tool-card">
