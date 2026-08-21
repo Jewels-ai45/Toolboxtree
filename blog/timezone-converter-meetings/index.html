@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Time Zone Meeting Converter — See Meeting Times Across Cities | ToolboxTree</title>
+<meta name="description" content="Free time zone meeting converter. Enter a meeting time and instantly see what it is in New York, London, Dubai, Mumbai, Singapore, Tokyo, and Sydney. No sign-up, runs entirely in your browser.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="stylesheet" href="/css/site.css">
+<style>
+  .tz-tool { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 24px; margin: 24px 0 32px; }
+  .tz-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 8px; }
+  .tz-field { flex: 1; min-width: 200px; }
+  .tz-field label { display: block; font-size: 0.85rem; color: var(--faint); margin-bottom: 6px; }
+  .tz-field select, .tz-field input[type="time"] {
+    width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.04); color: inherit; font-size: 1rem;
+  }
+  .tz-results { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; }
+  .tz-result-row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px dashed rgba(255,255,255,0.08); }
+  .tz-result-row:last-child { border-bottom: none; }
+  .tz-city { font-weight: 600; }
+  .tz-time { font-variant-numeric: tabular-nums; }
+  .tz-day-note { font-size: 0.78rem; color: var(--faint); margin-left: 8px; }
+  .tz-note { font-size: 0.85rem; color: var(--faint); margin-top: 10px; }
+</style>
+</head>
+<body data-nav="">
+<div id="site-nav"></div>
+
+<main class="section container" style="max-width:720px;">
+  <p style="color:var(--faint); font-size:0.85rem;">Blog / Productivity</p>
+  <h1 style="font-size:1.8rem;">Time Zone Meeting Converter</h1>
+  <p>Trying to schedule a meeting across time zones? Enter a time below and instantly see what it looks like in cities around the world — no sign-up, nothing sent to a server, works entirely in your browser.</p>
+
+  <div class="tz-tool">
+    <div class="tz-row">
+      <div class="tz-field">
+        <label for="meetingTime">Meeting time</label>
+        <input type="time" id="meetingTime" value="09:00">
+      </div>
+      <div class="tz-field">
+        <label for="fromZone">In this time zone</label>
+        <select id="fromZone"></select>
+      </div>
+    </div>
+    <div class="tz-results" id="tzResults"></div>
+    <p class="tz-note">Times are calculated for today's date. Daylight saving changes are accounted for automatically.</p>
+  </div>
+
+  <h2 style="font-size:1.1rem; margin-top:28px;">Why meeting times get confusing</h2>
+  <p>Between different UTC offsets and daylight saving rules that don't change on the same dates everywhere, converting a meeting time by hand is an easy way to end up double-booked or an hour off. This tool does the math for you against the most commonly used time zones for international teams.</p>
+
+  <h2 style="font-size:1.1rem; margin-top:28px;">Tips for scheduling across time zones</h2>
+  <p>Where possible, agree on a specific UTC time in your invite rather than relying on everyone to convert it themselves. Watch for the roughly six-week windows each year when the US, Europe, and Australia shift their clocks on different dates — that's when time differences unexpectedly change by an hour. And when in doubt, share a link to a tool like this one instead of writing out multiple times by hand.</p>
+</main>
+
+<div id="site-footer"></div>
+<script src="/js/include.js"></script>
+<script>
+(function () {
+  var ZONES = [
+    { id: 'America/Los_Angeles', label: 'Los Angeles' },
+    { id: 'America/Chicago', label: 'Chicago' },
+    { id: 'America/New_York', label: 'New York' },
+    { id: 'Europe/London', label: 'London' },
+    { id: 'Europe/Paris', label: 'Paris' },
+    { id: 'Asia/Dubai', label: 'Dubai' },
+    { id: 'Asia/Kolkata', label: 'Mumbai / New Delhi' },
+    { id: 'Asia/Singapore', label: 'Singapore' },
+    { id: 'Asia/Tokyo', label: 'Tokyo' },
+    { id: 'Australia/Sydney', label: 'Sydney' },
+    { id: 'Pacific/Auckland', label: 'Auckland' }
+  ];
+
+  var timeInput = document.getElementById('meetingTime');
+  var fromSelect = document.getElementById('fromZone');
+  var resultsEl = document.getElementById('tzResults');
+
+  var localZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+
+  // Populate the "from" dropdown, defaulting to the visitor's detected zone if it's in the list,
+  // otherwise adding it as an extra option at the top.
+  var zoneIds = ZONES.map(function (z) { return z.id; });
+  var allZones = ZONES.slice();
+  if (zoneIds.indexOf(localZone) === -1) {
+    allZones = [{ id: localZone, label: localZone.replace('_', ' ') + ' (detected)' }].concat(ZONES);
+  }
+  allZones.forEach(function (z) {
+    var opt = document.createElement('option');
+    opt.value = z.id;
+    opt.textContent = z.label + (z.id === localZone ? ' (your time zone)' : '');
+    fromSelect.appendChild(opt);
+  });
+  fromSelect.value = localZone;
+
+  function getOffsetMinutes(timeZone, date) {
+    var dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: timeZone, hourCycle: 'h23',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+    var parts = dtf.formatToParts(date).reduce(function (acc, p) {
+      acc[p.type] = p.value; return acc;
+    }, {});
+    var asUTC = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
+    return (asUTC - date.getTime()) / 60000;
+  }
+
+  function wallTimeToInstant(y, m, d, hh, mm, timeZone) {
+    var guess = Date.UTC(y, m - 1, d, hh, mm);
+    var offset = getOffsetMinutes(timeZone, new Date(guess));
+    return new Date(guess - offset * 60000);
+  }
+
+  function render() {
+    var now = new Date();
+    var timeVal = timeInput.value || '09:00';
+    var parts = timeVal.split(':');
+    var hh = parseInt(parts[0], 10), mm = parseInt(parts[1], 10);
+    var fromZone = fromSelect.value;
+
+    var instant = wallTimeToInstant(now.getFullYear(), now.getMonth() + 1, now.getDate(), hh, mm, fromZone);
+
+    var baseDayFmt = new Intl.DateTimeFormat('en-US', { timeZone: fromZone, day: 'numeric' });
+    var baseDay = baseDayFmt.format(instant);
+
+    resultsEl.innerHTML = '';
+    ZONES.forEach(function (z) {
+      var timeFmt = new Intl.DateTimeFormat('en-US', {
+        timeZone: z.id, hour: 'numeric', minute: '2-digit', hour12: true
+      });
+      var dayFmt = new Intl.DateTimeFormat('en-US', { timeZone: z.id, day: 'numeric' });
+      var weekdayFmt = new Intl.DateTimeFormat('en-US', { timeZone: z.id, weekday: 'short' });
+
+      var timeStr = timeFmt.format(instant);
+      var thisDay = dayFmt.format(instant);
+      var weekday = weekdayFmt.format(instant);
+
+      var dayNote = '';
+      if (thisDay !== baseDay) {
+        dayNote = (parseInt(thisDay, 10) > parseInt(baseDay, 10) || (parseInt(baseDay,10) > 25 && parseInt(thisDay,10) < 5))
+          ? ' (next day)' : ' (prev. day)';
+      }
+
+      var row = document.createElement('div');
+      row.className = 'tz-result-row';
+      row.innerHTML =
+        '<span class="tz-city">' + z.label + '</span>' +
+        '<span><span class="tz-time">' + timeStr + '</span>' +
+        '<span class="tz-day-note">' + weekday + dayNote + '</span></span>';
+      resultsEl.appendChild(row);
+    });
+  }
+
+  timeInput.addEventListener('input', render);
+  fromSelect.addEventListener('change', render);
+  render();
+})();
+</script>
+</body>
+</html>
