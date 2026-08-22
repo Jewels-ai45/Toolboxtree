@@ -153,28 +153,28 @@
   function isoDate(d){ return d.toISOString().slice(0,10); }
 
   function fetchRates(){
-    var today = new Date();
-    var prior = new Date(today.getTime() - 24*60*60*1000);
     var latestUrl = 'https://api.frankfurter.dev/v1/latest?from=AUD&to=' + CODES;
-    var priorUrl = 'https://api.frankfurter.dev/v1/' + isoDate(prior) + '?from=AUD&to=' + CODES;
 
-    Promise.all([
-      fetch(latestUrl).then(function(r){ if(!r.ok) throw new Error('latest fetch failed'); return r.json(); }),
-      fetch(priorUrl).then(function(r){ if(!r.ok) throw new Error('prior fetch failed'); return r.json(); })
-    ]).then(function(results){
-      var latest = results[0], prior = results[1];
-      DATA = CURRENCIES.map(function(c){
-        var rate = latest.rates[c.code];
-        var prev = prior.rates[c.code];
-        var change = (prev && rate) ? ((rate - prev) / prev) * 100 : 0;
-        return { code:c.code, name:c.name, rate:rate, change:change };
+    fetch(latestUrl).then(function(r){ if(!r.ok) throw new Error('latest fetch failed'); return r.json(); })
+      .then(function(latest){
+        var latestDate = new Date(latest.date + 'T00:00:00Z');
+        var priorDate = new Date(latestDate.getTime() - 24*60*60*1000);
+        var priorUrl = 'https://api.frankfurter.dev/v1/' + isoDate(priorDate) + '?from=AUD&to=' + CODES;
+        return fetch(priorUrl).then(function(r){ if(!r.ok) throw new Error('prior fetch failed'); return r.json(); })
+          .then(function(prior){
+            DATA = CURRENCIES.map(function(c){
+              var rate = latest.rates[c.code];
+              var prev = prior.rates[c.code];
+              var change = (prev && rate) ? ((rate - prev) / prev) * 100 : 0;
+              return { code:c.code, name:c.name, rate:rate, change:change };
+            });
+            updatedEl.textContent = 'Rates for ' + latest.date + ' · vs ' + prior.date;
+            renderBubbles();
+            renderTable();
+          });
+      }).catch(function(err){
+        showError();
       });
-      updatedEl.textContent = 'Rates for ' + latest.date + ' · vs ' + prior.date;
-      renderBubbles();
-      renderTable();
-    }).catch(function(err){
-      showError();
-    });
   }
 
   function showError(){
