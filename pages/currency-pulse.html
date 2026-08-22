@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Currency Pulse — Live Exchange Rate Snapshot | ToolboxTree</title>
+<meta name="description" content="See how major world currencies are moving against the Australian dollar today, at a glance — free, live, no sign-up needed.">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="stylesheet" href="/css/site.css">
+<style>
+  /* Page-scoped tokens for the two states a rate can be in.
+     Mint reuses the site's own --teal-500 brand token directly.
+     Mango is new to this page — defined the same way the rest of
+     the site defines its dark-mode swaps, so it stays consistent
+     with the sitewide theme toggle rather than adding a second one. */
+  :root{ --mango: #eb9310; }
+  :root[data-theme="dark"]{ --mango: #f5a83a; }
+
+  .cp-intro{ max-width:60ch; }
+  .cp-meta{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+    margin:18px 0 10px; font-size:12.5px; color:var(--faint);
+  }
+  .cp-legend{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  .cp-legend span{ display:flex; align-items:center; gap:5px; }
+  .cp-swatch{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .cp-controls{ display:flex; gap:8px; }
+  button.cp-btn{
+    font:inherit; font-size:13px; cursor:pointer;
+    background:var(--card); color:var(--ink); border:1px solid var(--border); border-radius:8px;
+    padding:7px 12px;
+  }
+  button.cp-btn:hover{ border-color: var(--border-strong); }
+  button.cp-btn[aria-pressed="true"]{ border-color: var(--teal-500); color: var(--teal-500); }
+
+  #cpField{
+    position:relative; height:420px; background:var(--card);
+    border:1px solid var(--border); border-radius:16px; overflow:hidden;
+  }
+  .cp-state{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:12px; text-align:center; color:var(--muted); font-size:0.95rem; padding:24px;
+  }
+  .cp-spinner{
+    width:28px; height:28px; border-radius:50%;
+    border:3px solid var(--border); border-top-color: var(--teal-500);
+    animation: cp-spin 0.8s linear infinite;
+  }
+  @keyframes cp-spin{ to{ transform: rotate(360deg); } }
+
+  .cp-bubble{
+    position:absolute; border-radius:50%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:#fff; text-align:center; cursor:default; user-select:none;
+    animation: cp-bob 6s ease-in-out infinite;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12), inset 0 0 0 1px rgba(255,255,255,0.14);
+  }
+  .cp-bubble .code{ font-weight:700; font-size:13px; line-height:1.1; }
+  .cp-bubble .chg{ font-size:11px; opacity:0.92; margin-top:2px; }
+  .cp-bubble.up{ background: var(--teal-500); }
+  .cp-bubble.down{ background: var(--mango); }
+  @keyframes cp-bob{
+    0%,100%{ transform: translate(0,0); }
+    50%{ transform: translate(var(--dx,4px), var(--dy,-6px)); }
+  }
+  @media (prefers-reduced-motion: reduce){ .cp-bubble{ animation:none; } }
+
+  #cpTip{
+    position:absolute; pointer-events:none; z-index:5;
+    background:var(--ink); color:var(--bg); font-size:12.5px; padding:8px 10px; border-radius:8px;
+    max-width:220px; opacity:0; transform:translateY(4px); transition:opacity .12s ease, transform .12s ease;
+  }
+  #cpTip.show{ opacity:1; transform:translateY(0); }
+  #cpTip .t-rate{ color:var(--faint); }
+
+  #cpTableWrap table{
+    width:100%; border-collapse:collapse; font-size:13.5px;
+    background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden;
+  }
+  #cpTableWrap th, #cpTableWrap td{ text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); }
+  #cpTableWrap th{ color:var(--faint); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.03em; }
+  #cpTableWrap tr:last-child td{ border-bottom:none; }
+  #cpTableWrap td.num{ font-variant-numeric: tabular-nums; }
+  .cp-dir{ font-weight:700; }
+  .cp-dir.up{ color: var(--teal-700); }
+  .cp-dir.down{ color: #a85a0a; }
+  :root[data-theme="dark"] .cp-dir.down{ color: var(--mango); }
+</style>
+</head>
+<body data-nav="tools" data-root="../">
+<div id="site-nav"></div>
+
+<main class="section container">
+  <div class="section-head" style="margin-bottom:12px;">
+    <h1 style="font-size:1.9rem;">Currency Pulse</h1>
+    <p class="cp-intro">How the world's major currencies are moving against the Australian dollar today — live, free, no sign-up.</p>
+  </div>
+
+  <div class="cp-meta">
+    <span id="cpUpdated">Loading today's rates…</span>
+    <span class="cp-legend">
+      <span><span class="cp-swatch" style="background:var(--teal-500)"></span>AUD stronger ▲</span>
+      <span><span class="cp-swatch" style="background:var(--mango)"></span>AUD weaker ▼</span>
+    </span>
+    <span class="cp-controls">
+      <button class="cp-btn" id="cpViewBtn" type="button" aria-pressed="false">☰ Table view</button>
+    </span>
+  </div>
+
+  <div id="cpField">
+    <div class="cp-state" id="cpLoading">
+      <div class="cp-spinner" aria-hidden="true"></div>
+      <p>Fetching today's rates…</p>
+    </div>
+  </div>
+  <div id="cpTip"></div>
+
+  <div id="cpTableWrap" style="display:none; margin-top:16px;">
+    <table>
+      <thead><tr><th>Currency</th><th>Rate (1 AUD =)</th><th>Change</th></tr></thead>
+      <tbody id="cpTableBody"></tbody>
+    </table>
+  </div>
+
+  <p style="margin-top:18px; font-size:12px; color:var(--faint);">
+    Rates from the European Central Bank via a free public API, compared against the previous available trading day. For general reference only — not financial advice.
+  </p>
+</main>
+
+<div id="site-footer"></div>
+<script src="/js/include.js"></script>
+<script>
+(function(){
+  var CURRENCIES = [
+    { code:'USD', name:'US Dollar' },
+    { code:'EUR', name:'Euro' },
+    { code:'GBP', name:'British Pound' },
+    { code:'JPY', name:'Japanese Yen' },
+    { code:'NZD', name:'NZ Dollar' },
+    { code:'CNY', name:'Chinese Yuan' },
+    { code:'INR', name:'Indian Rupee' },
+    { code:'CAD', name:'Canadian Dollar' }
+  ];
+  var CODES = CURRENCIES.map(function(c){ return c.code; }).join(',');
+
+  var field = document.getElementById('cpField');
+  var tip = document.getElementById('cpTip');
+  var updatedEl = document.getElementById('cpUpdated');
+  var DATA = null; // populated once fetch succeeds
+
+  function isoDate(d){ return d.toISOString().slice(0,10); }
+
+  function fetchRates(){
+    var today = new Date();
+    var prior = new Date(today.getTime() - 24*60*60*1000);
+    var latestUrl = 'https://api.frankfurter.dev/v1/latest?from=AUD&to=' + CODES;
+    var priorUrl = 'https://api.frankfurter.dev/v1/' + isoDate(prior) + '?from=AUD&to=' + CODES;
+
+    Promise.all([
+      fetch(latestUrl).then(function(r){ if(!r.ok) throw new Error('latest fetch failed'); return r.json(); }),
+      fetch(priorUrl).then(function(r){ if(!r.ok) throw new Error('prior fetch failed'); return r.json(); })
+    ]).then(function(results){
+      var latest = results[0], prior = results[1];
+      DATA = CURRENCIES.map(function(c){
+        var rate = latest.rates[c.code];
+        var prev = prior.rates[c.code];
+        var change = (prev && rate) ? ((rate - prev) / prev) * 100 : 0;
+        return { code:c.code, name:c.name, rate:rate, change:change };
+      });
+      updatedEl.textContent = 'Rates for ' + latest.date + ' · vs ' + prior.date;
+      renderBubbles();
+      renderTable();
+    }).catch(function(err){
+      showError();
+    });
+  }
+
+  function showError(){
+    field.innerHTML = '<div class="cp-state">' +
+      '<p>Couldn\'t load today\'s rates right now — this happens occasionally with any live data source.</p>' +
+      '<button class="cp-btn" id="cpRetry" type="button">Try again</button>' +
+      '</div>';
+    updatedEl.textContent = 'Rates unavailable right now';
+    document.getElementById('cpRetry').addEventListener('click', function(){
+      field.innerHTML = '<div class="cp-state" id="cpLoading"><div class="cp-spinner" aria-hidden="true"></div><p>Fetching today\'s rates…</p></div>';
+      updatedEl.textContent = "Loading today's rates…";
+      fetchRates();
+    });
+  }
+
+  var MIN_R = 34, MAX_R = 78;
+  function radiusFor(mags, minM, maxM, change){
+    var m = Math.abs(change);
+    var t = maxM === minM ? 1 : (m - minM) / (maxM - minM);
+    return MIN_R + (MAX_R - MIN_R) * Math.sqrt(t);
+  }
+
+  function layoutBubbles(){
+    var w = field.clientWidth, h = field.clientHeight;
+    var mags = DATA.map(function(d){ return Math.abs(d.change); });
+    var minM = Math.min.apply(null, mags), maxM = Math.max.apply(null, mags);
+    var placed = [];
+    DATA.forEach(function(d){
+      var r = radiusFor(mags, minM, maxM, d.change);
+      var x, y, tries = 0, ok = false;
+      while (!ok && tries < 400){
+        x = r + Math.random() * (w - 2*r);
+        y = r + Math.random() * (h - 2*r);
+        ok = placed.every(function(p){ return Math.hypot(p.x - x, p.y - y) > p.r + r + 8; });
+        tries++;
+      }
+      placed.push({ x:x, y:y, r:r, d:d });
+    });
+    return placed;
+  }
+
+  function renderBubbles(){
+    field.innerHTML = '';
+    var placed = layoutBubbles();
+    placed.forEach(function(item){
+      var x=item.x, y=item.y, r=item.r, d=item.d;
+      var el = document.createElement('div');
+      el.className = 'cp-bubble ' + (d.change >= 0 ? 'up' : 'down');
+      el.style.width = el.style.height = (r*2) + 'px';
+      el.style.left = (x - r) + 'px';
+      el.style.top = (y - r) + 'px';
+      el.style.setProperty('--dx', (Math.random()*10-5).toFixed(1)+'px');
+      el.style.setProperty('--dy', (Math.random()*10-5).toFixed(1)+'px');
+      el.style.animationDuration = (5 + Math.random()*3).toFixed(1) + 's';
+      el.style.animationDelay = (-Math.random()*5).toFixed(1) + 's';
+      el.innerHTML = '<span class="code">'+d.code+'</span>' +
+        '<span class="chg">'+(d.change>=0?'▲':'▼')+' '+Math.abs(d.change).toFixed(2)+'%</span>';
+      el.addEventListener('mouseenter', function(e){ showTip(e, d); });
+      el.addEventListener('mousemove', moveTip);
+      el.addEventListener('mouseleave', hideTip);
+      el.addEventListener('click', function(e){ showTip(e, d); });
+      field.appendChild(el);
+    });
+  }
+
+  function showTip(e, d){
+    tip.innerHTML = '<div><b>'+d.name+' ('+d.code+')</b></div>' +
+      '<div class="t-rate">1 AUD = '+d.rate.toFixed(4)+' '+d.code+'</div>' +
+      '<div>'+(d.change>=0?'▲ AUD stronger':'▼ AUD weaker')+' by '+Math.abs(d.change).toFixed(2)+'%</div>';
+    tip.classList.add('show');
+    moveTip(e);
+  }
+  function moveTip(e){
+    var rect = field.getBoundingClientRect();
+    var x = e.clientX - rect.left + 14, y = e.clientY - rect.top + 14;
+    tip.style.left = Math.min(x, rect.width - 220) + 'px';
+    tip.style.top = y + 'px';
+  }
+  function hideTip(){ tip.classList.remove('show'); }
+
+  function renderTable(){
+    var body = document.getElementById('cpTableBody');
+    body.innerHTML = DATA.slice().sort(function(a,b){ return Math.abs(b.change)-Math.abs(a.change); })
+      .map(function(d){
+        return '<tr><td>'+d.name+' ('+d.code+')</td>' +
+          '<td class="num">'+d.rate.toFixed(4)+'</td>' +
+          '<td class="num cp-dir '+(d.change>=0?'up':'down')+'">'+(d.change>=0?'▲':'▼')+' '+Math.abs(d.change).toFixed(2)+'%</td></tr>';
+      }).join('');
+  }
+
+  window.addEventListener('resize', function(){
+    if (DATA && field.style.display !== 'none') renderBubbles();
+  });
+
+  var viewBtn = document.getElementById('cpViewBtn');
+  var tableWrap = document.getElementById('cpTableWrap');
+  viewBtn.addEventListener('click', function(){
+    var showingTable = tableWrap.style.display !== 'none';
+    tableWrap.style.display = showingTable ? 'none' : 'block';
+    field.style.display = showingTable ? 'block' : 'none';
+    viewBtn.setAttribute('aria-pressed', String(!showingTable));
+    viewBtn.textContent = showingTable ? '☰ Table view' : '🫧 Bubble view';
+    if (showingTable && DATA) renderBubbles();
+  });
+
+  fetchRates();
+})();
+</script>
+</body>
+</html>
