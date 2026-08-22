@@ -39,6 +39,9 @@
     position:relative; height:420px; background:var(--card);
     border:1px solid var(--border); border-radius:16px; overflow:hidden;
   }
+  @media (max-width:520px){
+    #cpField{ height:560px; }
+  }
   .cp-state{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
     flex-direction:column; gap:12px; text-align:center; color:var(--muted); font-size:0.95rem; padding:24px;
@@ -190,25 +193,29 @@
     });
   }
 
-  var MIN_R = 34, MAX_R = 78;
-  function radiusFor(mags, minM, maxM, change){
+  function radiusFor(mags, minM, maxM, change, minR, maxR){
     var m = Math.abs(change);
     var t = maxM === minM ? 1 : (m - minM) / (maxM - minM);
-    return MIN_R + (MAX_R - MIN_R) * Math.sqrt(t);
+    return minR + (maxR - minR) * Math.sqrt(t);
   }
 
   function layoutBubbles(){
     var w = field.clientWidth, h = field.clientHeight;
+    // Scale bubble size off the narrower dimension (usually width on phones)
+    // so small screens don't try to cram desktop-sized bubbles into a strip.
+    var bound = Math.min(w, h);
+    var maxR = Math.max(20, Math.min(78, bound / 5));
+    var minR = Math.max(14, maxR * 0.45);
     var mags = DATA.map(function(d){ return Math.abs(d.change); });
     var minM = Math.min.apply(null, mags), maxM = Math.max.apply(null, mags);
     var placed = [];
     DATA.forEach(function(d){
-      var r = radiusFor(mags, minM, maxM, d.change);
+      var r = radiusFor(mags, minM, maxM, d.change, minR, maxR);
       var x, y, tries = 0, ok = false;
-      while (!ok && tries < 400){
+      while (!ok && tries < 600){
         x = r + Math.random() * (w - 2*r);
         y = r + Math.random() * (h - 2*r);
-        ok = placed.every(function(p){ return Math.hypot(p.x - x, p.y - y) > p.r + r + 8; });
+        ok = placed.every(function(p){ return Math.hypot(p.x - x, p.y - y) > p.r + r + 6; });
         tries++;
       }
       placed.push({ x:x, y:y, r:r, d:d });
