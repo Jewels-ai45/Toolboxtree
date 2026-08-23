@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Debt Snowball Planner — Debt Payoff Order Preview | ToolboxTree</title>
+<meta name="description" content="See how the debt snowball method orders your payoff — a live preview of the Debt Snowball Planner, part of the ToolboxTree Money Planner.">
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+<style>
+  .preview-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--gold-100); color: var(--gold-700);
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    padding: 4px 10px; border-radius: 999px; margin-bottom: 10px;
+  }
+  .debt-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.92rem; }
+  .debt-table th { text-align: left; color: var(--faint); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 0 10px 8px; }
+  .debt-table td { padding: 12px 10px; border-top: 1px solid var(--border); }
+  .debt-table tr td:first-child, .debt-table tr th:first-child { padding-left: 0; }
+  .order-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%; background: var(--teal-100); color: var(--teal-700);
+    font-weight: 800; font-size: 0.82rem; font-family: var(--font-display);
+  }
+  .locked-field { opacity: 0.6; }
+  .locked-field input { pointer-events: none; }
+  .lock-overlay-card { position: relative; }
+</style>
+</head>
+<body data-root="../" data-nav="planner" data-planner="debt-snowball">
+<div id="site-nav"></div>
+
+<main class="container planner-shell">
+  <nav class="planner-nav" id="planner-nav"></nav>
+
+  <div class="planner-main">
+    <div class="notice"><span class="dot"></span> This preview uses sample numbers — no account needed to try the real thing.</div>
+
+    <h1 style="font-size:1.8rem; margin-bottom:0;">Debt Snowball Planner</h1>
+    <p style="margin-top:-4px;">Pay minimums on everything, throw every extra dollar at your smallest balance first, then roll that payment into the next one once it's gone.</p>
+
+    <div class="card">
+      <span class="preview-badge">🔍 Sample preview</span>
+      <h3>Your payoff order</h3>
+      <p style="font-size:0.9rem;">Debts are automatically sorted smallest balance to largest — the order that gives you the fastest early wins.</p>
+      <div style="overflow-x:auto;">
+        <table class="debt-table">
+          <thead>
+            <tr><th></th><th>Debt</th><th>Balance</th><th>Interest</th><th>Min. payment</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="order-badge">1</span></td><td>Store card</td><td>$850</td><td>24.99%</td><td>$35</td></tr>
+            <tr><td><span class="order-badge">2</span></td><td>Credit card</td><td>$2,150</td><td>19.99%</td><td>$65</td></tr>
+            <tr><td><span class="order-badge">3</span></td><td>Personal loan</td><td>$4,300</td><td>11.0%</td><td>$140</td></tr>
+            <tr><td><span class="order-badge">4</span></td><td>Car loan</td><td>$8,400</td><td>6.5%</td><td>$220</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="field-row locked-field">
+        <label style="font-size:0.85rem; color:var(--muted); display:flex; flex-direction:column; gap:4px; flex:1;">
+          Extra payment per month
+          <input type="number" value="150" disabled>
+        </label>
+      </div>
+
+      <div class="stat-row" style="margin-top:18px;">
+        <div class="stat-box"><div class="num">4</div><div class="lab">Debts tracked</div></div>
+        <div class="stat-box"><div class="num">$15,700</div><div class="lab">Total owed</div></div>
+        <div class="stat-box"><div class="num">~34 mo</div><div class="lab">Projected payoff</div></div>
+      </div>
+    </div>
+
+    <div class="card upgrade-card">
+      <h3>🔒 Get the full Debt Snowball Planner</h3>
+      <ul>
+        <li>Add your own debts, balances and interest rates</li>
+        <li>Switch between snowball (smallest balance) and avalanche (highest interest) order</li>
+        <li>Your real payoff date updates automatically as you pay things down</li>
+        <li>Part of the Money Planner bundle — includes the Budget Planner and Savings Goal Tracker too</li>
+      </ul>
+      <p class="price-tag">$17 · one-time, yours to keep</p>
+      <a href="https://gumroad.com/" target="_blank" rel="noopener" class="btn btn-gold" style="margin-top:6px;">Get the Money Planner on Gumroad →</a>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+</body>
+</html>
