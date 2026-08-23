@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budget Planner — Free Monthly Budget Tracker | ToolboxTree</title>
+<meta name="description" content="Track income and spending by category, see exactly what's left, and stay on budget — a free, private, no sign-up budget planner.">
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+<style>
+  .progress-track { background: var(--border); border-radius: 999px; height: 8px; margin-top: 8px; overflow: hidden; }
+  .progress-fill { background: var(--teal-600); height: 100%; border-radius: 999px; transition: width .2s ease; }
+  .progress-fill.over { background: var(--danger); }
+  .cat-item { border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin-top: 12px; }
+  .cat-item .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .cat-item .amounts { display: flex; gap: 16px; font-size: 0.85rem; color: var(--muted); margin-top: 4px; flex-wrap: wrap; }
+  .cat-item .amounts b { color: var(--navy); }
+  .cat-item .edit-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .cat-item .edit-row input { width: 110px; border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 10px; font-family: var(--font-body); font-size: 0.85rem; background: var(--card); color: var(--ink); }
+  .cat-item .edit-row label { font-size: 0.78rem; color: var(--faint); display: flex; flex-direction: column; gap: 3px; }
+  .income-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .income-row:last-of-type { border-bottom: none; }
+  .income-row .del { background: none; border: none; cursor: pointer; color: var(--danger); font-size: 1rem; }
+  .summary-ring { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .summary-figures { display: grid; gap: 6px; }
+  .summary-figures .row { display: flex; justify-content: space-between; gap: 24px; font-size: 0.92rem; color: var(--muted); }
+  .summary-figures .row b { color: var(--navy); font-family: var(--font-display); }
+  .summary-figures .remaining { font-size: 1.5rem; font-weight: 800; font-family: var(--font-display); color: var(--teal-700); }
+  .summary-figures .remaining.over { color: var(--danger); }
+</style>
+</head>
+<body data-root="../" data-nav="planner" data-planner="budget-planner">
+<div id="site-nav"></div>
+
+<main class="container planner-shell">
+  <nav class="planner-nav" id="planner-nav"></nav>
+
+  <div class="planner-main">
+    <div class="notice"><span class="dot"></span> Your data is saved only on this device — nothing is uploaded, no account needed.</div>
+
+    <h1 style="font-size:1.8rem; margin-bottom:0;">Budget Planner</h1>
+    <p style="margin-top:-4px;">Track what's coming in, what's going out, and what's actually left.</p>
+
+    <div class="card">
+      <h3>📊 This month's summary</h3>
+      <div class="summary-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#e3e8e7" stroke-width="12"/>
+          <circle id="ringFill" cx="60" cy="60" r="50" fill="none" stroke="#0f9488" stroke-width="12"
+            stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" transform="rotate(-90 60 60)"/>
+          <text x="60" y="66" text-anchor="middle" font-family="Manrope" font-weight="800" font-size="18" fill="#0b1f3a" id="ringPct">0%</text>
+        </svg>
+        <div class="summary-figures">
+          <div class="row"><span>Income</span><b id="sumIncome">$0</b></div>
+          <div class="row"><span>Budgeted</span><b id="sumBudgeted">$0</b></div>
+          <div class="row"><span>Spent</span><b id="sumSpent">$0</b></div>
+          <div class="remaining" id="sumRemaining">$0 left</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="resetMonth" style="margin-top:16px;">↻ Reset spending for a new month</button>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Income</h3><span class="count" id="incomeCount">$0 total</span></div>
+      <p style="font-size:0.9rem;">Add every source of money coming in this month.</p>
+      <div id="incomeList"></div>
+      <div class="field-row">
+        <input type="text" id="newIncomeLabel" placeholder="e.g. Salary" style="max-width:200px;">
+        <input type="number" id="newIncomeAmt" placeholder="Amount" style="max-width:120px;">
+        <button class="btn btn-primary btn-sm" id="addIncome">+ Add</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Budget categories</h3><span class="count" id="catCount">0 categories</span></div>
+      <p style="font-size:0.9rem;">Set a budget per category, then log what you actually spend as the month goes.</p>
+      <div id="catList"></div>
+      <div class="field-row">
+        <input type="text" id="newCatName" placeholder="e.g. Groceries">
+        <button class="btn btn-primary btn-sm" id="addCat">+ Category</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+<script src="../js/planner.js"></script>
+<script>
+function fmt(n) { return '$' + (Math.round(n * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+
+function renderIncome() {
+  const income = Store.get('budgetIncome', [
+    { id: 1, label: 'Salary', amount: 0 },
+  ]);
+  const list = document.getElementById('incomeList');
+  list.innerHTML = income.map(i => `
+    <div class="income-row" data-id="${i.id}">
+      <span>${i.label || 'Income'}</span>
+      <span style="display:flex; align-items:center; gap:10px;">
+        <b>${fmt(i.amount)}</b>
+        <button class="del" data-id="${i.id}" aria-label="Remove">🗑</button>
+      </span>
+    </div>`).join('') || '<p style="font-size:0.85rem; color:var(--faint);">No income added yet.</p>';
+
+  const total = income.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  document.getElementById('incomeCount').textContent = fmt(total) + ' total';
+
+  list.querySelectorAll('.del').forEach(btn => btn.addEventListener('click', () => {
+    const updated = Store.get('budgetIncome', []).filter(i => i.id !== Number(btn.dataset.id));
+    Store.set('budgetIncome', updated);
+    renderAll();
+  }));
+  return total;
+}
+
+function renderCategories() {
+  const cats = Store.get('budgetCategories', [
+    { id: 1, name: 'Rent / Mortgage', budgeted: 0, spent: 0 },
+    { id: 2, name: 'Groceries', budgeted: 0, spent: 0 },
+  ]);
+  document.getElementById('catCount').textContent = `${cats.length} categor${cats.length === 1 ? 'y' : 'ies'}`;
+  document.getElementById('catList').innerHTML = cats.map(c => {
+    const pct = c.budgeted > 0 ? Math.min(100, Math.round((c.spent / c.budgeted) * 100)) : (c.spent > 0 ? 100 : 0);
+    const over = c.spent > c.budgeted && c.budgeted > 0;
+    return `
+    <div class="cat-item" data-id="${c.id}">
+      <div class="top">
+        <h3 style="margin:0; font-size:1rem;">${c.name}</h3>
+        <button class="delCat" data-id="${c.id}" style="background:none; border:none; cursor:pointer; color:var(--danger); font-size:1.05rem;" aria-label="Delete category">🗑</button>
+      </div>
+      <div class="amounts"><span><b>${fmt(c.spent)}</b> spent of ${fmt(c.budgeted)} budgeted</span></div>
+      <div class="progress-track"><div class="progress-fill ${over ? 'over' : ''}" style="width:${pct}%;"></div></div>
+      <div class="edit-row">
+        <label>Budgeted<input type="number" class="budgetedInput" data-id="${c.id}" value="${c.budgeted || ''}" placeholder="0"></label>
+        <label>Spent<input type="number" class="spentInput" data-id="${c.id}" value="${c.spent || ''}" placeholder="0"></label>
+      </div>
+    </div>`;
+  }).join('') || '<p style="font-size:0.85rem; color:var(--faint);">No categories yet — add your first one below.</p>';
+
+  document.querySelectorAll('.delCat').forEach(btn => btn.addEventListener('click', () => {
+    const updated = Store.get('budgetCategories', []).filter(c => c.id !== Number(btn.dataset.id));
+    Store.set('budgetCategories', updated);
+    renderAll();
+  }));
+  document.querySelectorAll('.budgetedInput').forEach(inp => inp.addEventListener('input', () => {
+    const cats = Store.get('budgetCategories', []);
+    const c = cats.find(c => c.id === Number(inp.dataset.id));
+    if (c) c.budgeted = parseFloat(inp.value) || 0;
+    Store.set('budgetCategories', cats);
+    renderSummaryOnly();
+  }));
+  document.querySelectorAll('.spentInput').forEach(inp => inp.addEventListener('input', () => {
+    const cats = Store.get('budgetCategories', []);
+    const c = cats.find(c => c.id === Number(inp.dataset.id));
+    if (c) c.spent = parseFloat(inp.value) || 0;
+    Store.set('budgetCategories', cats);
+    renderCatProgressOnly(c);
+    renderSummaryOnly();
+  }));
+
+  return cats;
+}
+
+// Lightweight partial re-renders so typing in a number field doesn't steal focus
+function renderCatProgressOnly(changed) {
+  if (!changed) return;
+  const row = document.querySelector(`.cat-item[data-id="${changed.id}"]`);
+  if (!row) return;
+  const pct = changed.budgeted > 0 ? Math.min(100, Math.round((changed.spent / changed.budgeted) * 100)) : (changed.spent > 0 ? 100 : 0);
+  const over = changed.spent > changed.budgeted && changed.budgeted > 0;
+  const fill = row.querySelector('.progress-fill');
+  fill.style.width = pct + '%';
+  fill.classList.toggle('over', over);
+  row.querySelector('.amounts span').innerHTML = `<b>${fmt(changed.spent)}</b> spent of ${fmt(changed.budgeted)} budgeted`;
+}
+
+function renderSummaryOnly() {
+  const income = Store.get('budgetIncome', []);
+  const cats = Store.get('budgetCategories', []);
+  const totalIncome = income.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const totalBudgeted = cats.reduce((s, c) => s + (Number(c.budgeted) || 0), 0);
+  const totalSpent = cats.reduce((s, c) => s + (Number(c.spent) || 0), 0);
+  const remaining = totalIncome - totalSpent;
+
+  document.getElementById('sumIncome').textContent = fmt(totalIncome);
+  document.getElementById('sumBudgeted').textContent = fmt(totalBudgeted);
+  document.getElementById('sumSpent').textContent = fmt(totalSpent);
+  const remEl = document.getElementById('sumRemaining');
+  remEl.textContent = (remaining < 0 ? '−' + fmt(Math.abs(remaining)) : fmt(remaining)) + (remaining < 0 ? ' over' : ' left');
+  remEl.classList.toggle('over', remaining < 0);
+
+  const pct = totalIncome > 0 ? Math.min(100, Math.round((totalSpent / totalIncome) * 100)) : 0;
+  const circumference = 314;
+  const ring = document.getElementById('ringFill');
+  ring.style.strokeDashoffset = circumference - (circumference * pct / 100);
+  ring.setAttribute('stroke', totalSpent > totalIncome && totalIncome > 0 ? 'var(--danger)' : '#0f9488');
+  document.getElementById('ringPct').textContent = pct + '%';
+}
+
+function renderAll() {
+  renderIncome();
+  renderCategories();
+  renderSummaryOnly();
+}
+renderAll();
+
+document.getElementById('addIncome').addEventListener('click', () => {
+  const labelInput = document.getElementById('newIncomeLabel');
+  const amtInput = document.getElementById('newIncomeAmt');
+  const label = labelInput.value.trim();
+  const amount = parseFloat(amtInput.value);
+  if (!label && !Number.isFinite(amount)) return;
+  const income = Store.get('budgetIncome', []);
+  income.push({ id: Date.now(), label: label || 'Income', amount: Number.isFinite(amount) ? amount : 0 });
+  Store.set('budgetIncome', income);
+  labelInput.value = '';
+  amtInput.value = '';
+  renderAll();
+});
+
+document.getElementById('addCat').addEventListener('click', () => {
+  const input = document.getElementById('newCatName');
+  const name = input.value.trim();
+  if (!name) return;
+  const cats = Store.get('budgetCategories', []);
+  cats.push({ id: Date.now(), name, budgeted: 0, spent: 0 });
+  Store.set('budgetCategories', cats);
+  input.value = '';
+  renderAll();
+});
+
+document.getElementById('resetMonth').addEventListener('click', () => {
+  if (!confirm('Reset all "spent" amounts to $0 for a new month? Your categories and budgeted amounts stay the same.')) return;
+  const cats = Store.get('budgetCategories', []);
+  cats.forEach(c => c.spent = 0);
+  Store.set('budgetCategories', cats);
+  renderAll();
+});
+</script>
+</body>
+</html>
