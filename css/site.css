@@ -122,8 +122,8 @@
 .ring-goal { color: var(--muted); font-size: 0.9rem; }
 
 .upgrade-card {
-  background: linear-gradient(155deg, var(--gold-100), #fff);
-  border: 1px solid #f1ddaa;
+  background: linear-gradient(155deg, var(--gold-100), var(--card));
+  border: 1px solid var(--gold-100);
 }
 .upgrade-card h3 { display: flex; align-items: center; gap: 8px; }
 .upgrade-card ul { padding-left: 20px; color: var(--muted); margin: 14px 0 20px; }
