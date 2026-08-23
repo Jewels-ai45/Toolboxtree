@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Savings Goal Tracker — Preview | ToolboxTree</title>
+<meta name="description" content="See how the Savings Goal Tracker visualises progress toward a target — a live preview, part of the ToolboxTree Money Planner.">
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+<link rel="stylesheet" href="../css/site.css">
+<style>
+  .preview-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--gold-100); color: var(--gold-700);
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    padding: 4px 10px; border-radius: 999px; margin-bottom: 10px;
+  }
+  .locked-field { opacity: 0.6; }
+  .locked-field input { pointer-events: none; }
+  .goal-second { border: 1px dashed var(--border-strong); border-radius: 14px; padding: 16px 18px; margin-top: 14px; text-align: center; color: var(--faint); font-size: 0.88rem; }
+</style>
+</head>
+<body data-root="../" data-nav="planner" data-planner="savings-goal-tracker">
+<div id="site-nav"></div>
+
+<main class="container planner-shell">
+  <nav class="planner-nav" id="planner-nav"></nav>
+
+  <div class="planner-main">
+    <div class="notice"><span class="dot"></span> This preview uses a sample goal — no account needed to try the real thing.</div>
+
+    <h1 style="font-size:1.8rem; margin-bottom:0;">Savings Goal Tracker</h1>
+    <p style="margin-top:-4px;">Set a target, log what you put aside, and watch it fill up.</p>
+
+    <div class="card">
+      <span class="preview-badge">🔍 Sample preview</span>
+      <h3>🏖️ Holiday fund</h3>
+      <div class="ring-progress">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#e3e8e7" stroke-width="12"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#0f9488" stroke-width="12"
+            stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="115" transform="rotate(-90 60 60)"/>
+          <text x="60" y="66" text-anchor="middle" font-family="Manrope" font-weight="800" font-size="18" fill="#0b1f3a">63%</text>
+        </svg>
+        <div>
+          <div class="ring-amount">$1,890</div>
+          <div class="ring-goal">of $3,000 goal</div>
+        </div>
+      </div>
+
+      <div class="field-row locked-field">
+        <label style="font-size:0.85rem; color:var(--muted); display:flex; flex-direction:column; gap:4px; flex:1;">
+          Add to this goal
+          <input type="number" value="100" disabled>
+        </label>
+      </div>
+
+      <div class="goal-second">+ Add another goal — locked in preview</div>
+    </div>
+
+    <div class="card upgrade-card">
+      <h3>🔒 Get the full Savings Goal Tracker</h3>
+      <ul>
+        <li>Track unlimited savings goals at once, each with its own target and progress ring</li>
+        <li>Log contributions as you make them and see your target date estimate update</li>
+        <li>Part of the Money Planner bundle — includes the Budget Planner and Debt Snowball Planner too</li>
+      </ul>
+      <p class="price-tag">$17 · one-time, yours to keep</p>
+      <a href="https://gumroad.com/" target="_blank" rel="noopener" class="btn btn-gold" style="margin-top:6px;">Get the Money Planner on Gumroad →</a>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="../js/include.js"></script>
+</body>
+</html>
