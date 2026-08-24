@@ -132,12 +132,98 @@
 
 /* ---------- Simple tool widgets (calculator etc.) ---------- */
 .tool-widget { max-width: 480px; margin: 0 auto; }
+
+/* Calculator "screen" tokens — intentionally fixed dark colors (a phone-screen
+   look) rather than the theme-flipping --navy variable. --navy is repurposed
+   as a heading/ink color in dark mode and turns light, which is why the old
+   .calc-display (background: var(--navy); color: #fff) went unreadable —
+   white text on a now-light background. These stay dark in both themes so
+   contrast is always correct. */
+:root {
+  --calc-bg: #0b1f3a;
+  --calc-bg-soft: #16305a;
+  --calc-fg: #ffffff;
+  --calc-preview: rgba(255, 255, 255, 0.62);
+  --calc-hist: rgba(255, 255, 255, 0.45);
+}
+:root[data-theme="dark"] {
+  --calc-bg: #060d18;
+  --calc-bg-soft: #0d1a2e;
+  --calc-fg: #ffffff;
+  --calc-preview: rgba(255, 255, 255, 0.6);
+  --calc-hist: rgba(255, 255, 255, 0.42);
+}
+
 .calc-display {
-  background: var(--navy); color: #fff; font-family: var(--font-display);
+  background: var(--calc-bg); color: var(--calc-fg); font-family: var(--font-display);
   font-size: 2.2rem; font-weight: 700; text-align: right;
   border-radius: 16px; padding: 22px 20px; margin-bottom: 14px; overflow-x: auto;
 }
+
+/* Redesigned multi-line screen: history ticker + live expression + a running
+   preview of the answer, before "=" is pressed — the Samsung Calculator look. */
+.calc-screen {
+  background: linear-gradient(165deg, var(--calc-bg-soft), var(--calc-bg));
+  border-radius: 20px;
+  padding: 16px 20px 18px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-md);
+}
+.calc-screen-top {
+  display: flex; align-items: center; gap: 10px; min-height: 28px; margin-bottom: 2px;
+}
+.calc-icon-btn {
+  background: rgba(255, 255, 255, 0.08); border: none; color: var(--calc-preview);
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 0.95rem;
+  display: flex; align-items: center; justify-content: center; flex: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.calc-icon-btn:hover { background: rgba(255, 255, 255, 0.18); color: #fff; }
+.calc-mem-badge {
+  margin: 0 auto; font-size: 0.72rem; font-weight: 800;
+  color: var(--teal-500); border: 1px solid var(--teal-500); border-radius: 999px;
+  padding: 1px 9px; letter-spacing: 0.03em;
+}
+.calc-copy-btn { margin-left: auto; }
+.calc-history-line {
+  min-height: 18px; text-align: right; font-size: 0.85rem; color: var(--calc-hist);
+  overflow-x: auto; white-space: nowrap;
+}
+.calc-expr-line {
+  text-align: right; font-family: var(--font-display); font-weight: 700; color: var(--calc-fg);
+  font-size: 2.1rem; line-height: 1.25; overflow-x: auto; white-space: nowrap; padding: 2px 0;
+}
+.calc-preview-line {
+  min-height: 24px; text-align: right; font-size: 1.05rem; font-weight: 600;
+  color: var(--calc-preview); overflow-x: auto; white-space: nowrap;
+}
+
+/* History dropdown panel */
+.calc-history-panel {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: var(--shadow-lg); padding: 14px 16px; margin-bottom: 14px;
+  max-height: 260px; display: flex; flex-direction: column; gap: 8px;
+}
+.calc-history-panel-head { display: flex; align-items: center; justify-content: space-between; }
+.calc-history-panel-head h3 { margin: 0; font-size: 0.95rem; }
+.calc-history-list { overflow-y: auto; display: grid; gap: 4px; }
+.calc-history-empty { color: var(--faint); font-size: 0.88rem; font-style: italic; padding: 10px 0; text-align: center; }
+.calc-history-item {
+  display: flex; justify-content: space-between; gap: 10px; width: 100%;
+  background: transparent; border: none; border-radius: 10px; padding: 8px 10px;
+  cursor: pointer; text-align: left; color: var(--navy); font-family: var(--font-body);
+  transition: background 0.15s ease;
+}
+.calc-history-item:hover { background: var(--teal-50); }
+.calc-history-item .hx-expr { color: var(--muted); font-size: 0.85rem; }
+.calc-history-item .hx-res { font-weight: 700; }
+
+/* Mode tabs (Basic / Scientific / Converter) */
+.calc-mode-tabs { justify-content: center; margin-bottom: 14px; }
+
+/* Keypad */
 .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.calc-grid + .calc-grid { margin-top: 10px; }
 .calc-grid button {
   padding: 18px 0; border-radius: 12px; border: 1px solid var(--border);
   background: var(--card); font-size: 1.1rem; font-weight: 700; cursor: pointer; color: var(--navy);
@@ -148,6 +234,51 @@
 .calc-grid button.op { background: var(--teal-100); color: var(--teal-700); }
 .calc-grid button.eq { background: var(--teal-700); color: #fff; grid-column: span 2; }
 .calc-grid button.clear { background: #fbeaea; color: var(--danger); }
+.calc-grid button.mem {
+  font-size: 0.82rem; padding: 12px 0; background: transparent;
+  border: 1px solid var(--border-strong); color: var(--muted);
+}
+.calc-grid button.mem:hover { color: var(--teal-700); border-color: var(--teal-500); background: var(--card); }
+.calc-sci-grid button.sci { background: var(--gold-100); color: var(--gold-700); font-size: 0.95rem; }
+.calc-sci-grid button.sci:hover { filter: brightness(0.96); }
+
+/* Toast (e.g. "Copied") */
+.calc-toast {
+  position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%) translateY(10px);
+  background: var(--navy); color: #fff; padding: 10px 18px; border-radius: 999px;
+  font-size: 0.85rem; font-weight: 600; box-shadow: var(--shadow-lg);
+  opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; z-index: 200;
+  max-width: 90vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.calc-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Unit converter */
+.calc-converter { display: grid; gap: 14px; }
+.conv-row { display: flex; gap: 10px; }
+.conv-row input {
+  flex: 1; border: 1px solid var(--border-strong); border-radius: 10px; padding: 12px 14px;
+  font-family: var(--font-body); font-size: 1rem; background: var(--card); color: var(--ink);
+  min-width: 0;
+}
+.conv-row input[readonly] { color: var(--teal-700); font-weight: 700; }
+.conv-row select {
+  border: 1px solid var(--border-strong); border-radius: 10px; padding: 12px 10px;
+  background: var(--card); color: var(--ink); font-family: var(--font-body); font-weight: 600;
+}
+.conv-swap {
+  justify-self: center; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--teal-50); color: var(--teal-700); display: flex; align-items: center;
+  justify-content: center; cursor: pointer; font-weight: 700;
+}
+.conv-swap:hover { background: var(--teal-100); }
+
+/* These elements set their own `display` for when they're shown, which — at
+   equal specificity — beats the browser's default `[hidden]{display:none}`.
+   Restate it explicitly so toggling the `hidden` attribute actually hides
+   them (mode tabs, the scientific keypad, the history panel). */
+.calc-grid[hidden],
+.calc-converter[hidden],
+.calc-history-panel[hidden] { display: none; }
 
 .result-box {
   background: var(--teal-50); border: 1px solid var(--teal-100); border-radius: 14px;
