@@ -16,95 +16,419 @@
 <main class="section container">
   <div class="section-head">
     <h1 style="font-size:1.8rem;">Free Online Calculator</h1>
-    <p>Everyday arithmetic, done instantly. Nothing you type is stored or sent anywhere.</p>
+    <p>Everyday arithmetic, done instantly — with a live preview, history, memory and a scientific mode. Nothing you type is stored or sent anywhere.</p>
   </div>
 
   <div class="tool-widget">
-    <div class="calc-display" id="display">0</div>
-    <div class="calc-grid">
-      <button class="clear" data-act="clear">AC</button>
-      <button class="op" data-act="sign">±</button>
-      <button class="op" data-act="percent">%</button>
-      <button class="op" data-val="/">÷</button>
 
-      <button data-val="7">7</button>
-      <button data-val="8">8</button>
-      <button data-val="9">9</button>
-      <button class="op" data-val="*">×</button>
-
-      <button data-val="4">4</button>
-      <button data-val="5">5</button>
-      <button data-val="6">6</button>
-      <button class="op" data-val="-">−</button>
-
-      <button data-val="1">1</button>
-      <button data-val="2">2</button>
-      <button data-val="3">3</button>
-      <button class="op" data-val="+">+</button>
-
-      <button data-val="0" style="grid-column:span 2;">0</button>
-      <button data-val=".">.</button>
-      <button class="eq" data-act="equals">=</button>
+    <div class="calc-screen" id="calcScreen">
+      <div class="calc-screen-top">
+        <button class="calc-icon-btn" id="historyBtn" type="button" aria-label="Show calculation history" aria-expanded="false" title="History">🕘</button>
+        <span class="calc-mem-badge" id="memBadge" hidden>M</span>
+        <button class="calc-icon-btn calc-copy-btn" id="copyBtn" type="button" aria-label="Copy result" title="Copy result">⧉</button>
+      </div>
+      <div class="calc-history-line" id="historyLine"></div>
+      <div class="calc-expr-line" id="display">0</div>
+      <div class="calc-preview-line" id="previewLine"></div>
     </div>
+
+    <div class="calc-history-panel" id="historyPanel" hidden>
+      <div class="calc-history-panel-head">
+        <h3>History</h3>
+        <button class="btn btn-ghost btn-sm" id="clearHistoryBtn" type="button">Clear</button>
+      </div>
+      <div class="calc-history-list" id="historyList"></div>
+    </div>
+
+    <div class="pillbar calc-mode-tabs" role="tablist" id="modeTabs">
+      <button class="pill" data-mode="basic" aria-pressed="true" type="button">Basic</button>
+      <button class="pill" data-mode="scientific" aria-pressed="false" type="button">Scientific</button>
+      <button class="pill" data-mode="converter" aria-pressed="false" type="button">Converter</button>
+    </div>
+
+    <div id="keypad">
+      <div class="calc-grid calc-sci-grid" id="sciGrid" hidden>
+        <button class="sci" data-val="sin(" type="button">sin</button>
+        <button class="sci" data-val="cos(" type="button">cos</button>
+        <button class="sci" data-val="tan(" type="button">tan</button>
+        <button class="sci" data-val="(" type="button">(</button>
+
+        <button class="sci" data-val="√(" type="button">√</button>
+        <button class="sci" data-act="square" type="button">x²</button>
+        <button class="sci" data-act="reciprocal" type="button">1/x</button>
+        <button class="sci" data-val=")" type="button">)</button>
+
+        <button class="sci" data-val="ln(" type="button">ln</button>
+        <button class="sci" data-val="log(" type="button">log</button>
+        <button class="sci" data-val="π" type="button">π</button>
+        <button class="sci" data-val="e" type="button">e</button>
+      </div>
+
+      <div class="calc-grid" id="basicGrid">
+        <button class="mem" data-act="mc" type="button">MC</button>
+        <button class="mem" data-act="mr" type="button">MR</button>
+        <button class="mem" data-act="mminus" type="button">M−</button>
+        <button class="mem" data-act="mplus" type="button">M+</button>
+
+        <button class="clear" data-act="clear" type="button">AC</button>
+        <button class="op" data-act="sign" type="button">±</button>
+        <button class="op" data-act="percent" type="button">%</button>
+        <button class="op" data-val="/" type="button">÷</button>
+
+        <button data-val="7" type="button">7</button>
+        <button data-val="8" type="button">8</button>
+        <button data-val="9" type="button">9</button>
+        <button class="op" data-val="*" type="button">×</button>
+
+        <button data-val="4" type="button">4</button>
+        <button data-val="5" type="button">5</button>
+        <button data-val="6" type="button">6</button>
+        <button class="op" data-val="-" type="button">−</button>
+
+        <button data-val="1" type="button">1</button>
+        <button data-val="2" type="button">2</button>
+        <button data-val="3" type="button">3</button>
+        <button class="op" data-val="+" type="button">+</button>
+
+        <button data-val="0" style="grid-column:span 2;" type="button">0</button>
+        <button data-val="." type="button">.</button>
+        <button class="eq" data-act="equals" type="button">=</button>
+      </div>
+    </div>
+
+    <div class="calc-converter" id="converterPanel" hidden>
+      <div class="pillbar" id="convCategory">
+        <button class="pill" data-cat="length" aria-pressed="true" type="button">Length</button>
+        <button class="pill" data-cat="weight" aria-pressed="false" type="button">Weight</button>
+        <button class="pill" data-cat="temperature" aria-pressed="false" type="button">Temperature</button>
+      </div>
+      <div class="conv-row">
+        <input type="number" id="convFrom" value="1" inputmode="decimal" aria-label="Value to convert">
+        <select id="convFromUnit" aria-label="From unit"></select>
+      </div>
+      <div class="conv-swap" id="convSwap" role="button" tabindex="0" aria-label="Swap units">⇅</div>
+      <div class="conv-row">
+        <input type="number" id="convTo" readonly aria-label="Converted value">
+        <select id="convToUnit" aria-label="To unit"></select>
+      </div>
+    </div>
+
   </div>
 
   <div class="container" style="margin-top:48px; max-width:680px;">
     <h2 style="font-size:1.2rem;">Use cases</h2>
     <ul style="color:var(--muted);">
       <li>Quickly balancing personal budgets</li>
-      <li>Solving math homework easily</li>
+      <li>Solving math homework easily — trig, logs and roots included</li>
       <li>Checking totals before a purchase</li>
+      <li>Converting units on the fly (length, weight, temperature)</li>
     </ul>
   </div>
   <div class="container" style="max-width:680px;"><div class="ad-slot" aria-hidden="true"></div></div>
 </main>
 
+<div class="calc-toast" id="calcToast" role="status" aria-live="polite"></div>
+
 <div id="site-footer"></div>
 <script src="../js/include.js"></script>
 <script>
-let expr = '';
-const display = document.getElementById('display');
+(function () {
+  const display = document.getElementById('display');
+  const historyLine = document.getElementById('historyLine');
+  const previewLine = document.getElementById('previewLine');
+  const memBadge = document.getElementById('memBadge');
+  const copyBtn = document.getElementById('copyBtn');
+  const historyBtn = document.getElementById('historyBtn');
+  const historyPanel = document.getElementById('historyPanel');
+  const historyList = document.getElementById('historyList');
+  const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+  const modeTabs = document.getElementById('modeTabs');
+  const calcScreen = document.getElementById('calcScreen');
+  const keypad = document.getElementById('keypad');
+  const sciGrid = document.getElementById('sciGrid');
+  const basicGrid = document.getElementById('basicGrid');
+  const converterPanel = document.getElementById('converterPanel');
+  const toast = document.getElementById('calcToast');
 
-function update() { display.textContent = expr || '0'; }
+  let expr = '';
+  let memory = 0;
+  let mode = 'basic';
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem('tt-calc-history') || '[]'); } catch (e) { history = []; }
 
-document.querySelector('.calc-grid').addEventListener('click', e => {
-  const btn = e.target.closest('button');
-  if (!btn) return;
-  const { act, val } = btn.dataset;
-
-  if (val !== undefined) { expr += val; update(); return; }
-
-  if (act === 'clear') { expr = ''; update(); return; }
-  if (act === 'sign') {
-    const m = expr.match(/(-?\d*\.?\d+)$/);
-    if (m) expr = expr.slice(0, m.index) + (m[0].startsWith('-') ? m[0].slice(1) : '-' + m[0]);
-    update(); return;
+  // ---------- formatting / math helpers ----------
+  function formatDisplay(s) {
+    return s.replace(/\*/g, '×').replace(/\//g, '÷').replace(/-/g, '−');
   }
-  if (act === 'percent') {
-    const m = expr.match(/(-?\d*\.?\d+)$/);
-    if (m) expr = expr.slice(0, m.index) + (parseFloat(m[0]) / 100);
-    update(); return;
+  function balanceParens(s) {
+    const open = (s.match(/\(/g) || []).length;
+    const close = (s.match(/\)/g) || []).length;
+    return s + ')'.repeat(Math.max(0, open - close));
   }
-  if (act === 'equals') {
-    try {
-      // Safe-ish eval: only digits, operators, dot, parens allowed
-      if (/^[0-9+\-*/.() ]*$/.test(expr)) {
-        const result = Function('"use strict";return (' + expr + ')')();
-        expr = Number.isFinite(result) ? String(Math.round(result * 1e10) / 1e10) : 'Error';
-      } else {
-        expr = 'Error';
-      }
-    } catch { expr = 'Error'; }
+  function toJS(s) {
+    return s
+      .replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-')
+      .replace(/√\(/g, 'sqrt(')
+      .replace(/π/g, 'PI')
+      .replace(/\be\b/g, 'E')
+      .replace(/\^/g, '**');
+  }
+  function isSafe(js) {
+    const stripped = js.replace(/sin|cos|tan|sqrt|ln|log|PI|E/g, '');
+    return /^[0-9+\-*/.() ]*$/.test(stripped);
+  }
+  function evaluate(raw) {
+    const js = toJS(balanceParens(raw));
+    if (!isSafe(js)) throw new Error('unsafe expression');
+    const fn = new Function('sin', 'cos', 'tan', 'sqrt', 'ln', 'log', 'PI', 'E',
+      '"use strict"; return (' + js + ')');
+    const result = fn(
+      d => Math.sin(d * Math.PI / 180),
+      d => Math.cos(d * Math.PI / 180),
+      d => Math.tan(d * Math.PI / 180),
+      Math.sqrt, Math.log, Math.log10, Math.PI, Math.E
+    );
+    if (!Number.isFinite(result)) throw new Error('not finite');
+    return Math.round(result * 1e10) / 1e10;
+  }
+  function isEvaluable(s) {
+    if (!s) return false;
+    if (/[+\-*/.]$/.test(s)) return false;
+    if (s.slice(-1) === '(') return false;
+    return true;
+  }
+
+  // ---------- render ----------
+  function update() {
+    display.textContent = formatDisplay(expr) || '0';
+    if (expr && isEvaluable(expr)) {
+      try {
+        const result = evaluate(expr);
+        previewLine.textContent = '= ' + result;
+      } catch (e) { previewLine.textContent = ''; }
+    } else {
+      previewLine.textContent = '';
+    }
+  }
+
+  function renderHistory() {
+    if (!history.length) {
+      historyList.innerHTML = '<div class="calc-history-empty">No calculations yet</div>';
+      return;
+    }
+    historyList.innerHTML = history.map((h, i) =>
+      '<button class="calc-history-item" type="button" data-idx="' + i + '">' +
+        '<span class="hx-expr">' + formatDisplay(h.raw) + ' =</span>' +
+        '<span class="hx-res">' + h.result + '</span>' +
+      '</button>'
+    ).join('');
+  }
+
+  function pushHistory(raw, result) {
+    history.unshift({ raw: raw, result: String(result) });
+    history = history.slice(0, 30);
+    try { localStorage.setItem('tt-calc-history', JSON.stringify(history)); } catch (e) {}
+    renderHistory();
+  }
+
+  // ---------- toast ----------
+  let toastTimer;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1600);
+  }
+
+  // ---------- memory ----------
+  function currentValue() {
+    try { return evaluate(expr || '0'); } catch (e) { return 0; }
+  }
+  function setMemory(v) {
+    memory = v;
+    memBadge.hidden = memory === 0;
+  }
+
+  // ---------- keypad actions ----------
+  function pressValue(val) { expr += val; update(); }
+
+  function pressAction(act) {
+    if (act === 'clear') { expr = ''; historyLine.textContent = ''; update(); return; }
+
+    if (act === 'sign') {
+      const m = expr.match(/(-?\d*\.?\d+)$/);
+      if (m) expr = expr.slice(0, m.index) + (m[0].startsWith('-') ? m[0].slice(1) : '-' + m[0]);
+      update(); return;
+    }
+    if (act === 'percent') {
+      const m = expr.match(/(-?\d*\.?\d+)$/);
+      if (m) expr = expr.slice(0, m.index) + (parseFloat(m[0]) / 100);
+      update(); return;
+    }
+    if (act === 'square') {
+      if (/[\d)]$/.test(expr)) expr += '^2';
+      update(); return;
+    }
+    if (act === 'reciprocal') {
+      const m = expr.match(/(-?\d*\.?\d+)$/);
+      if (m) expr = expr.slice(0, m.index) + '(1/' + m[0] + ')';
+      update(); return;
+    }
+    if (act === 'mplus') { setMemory(memory + currentValue()); return; }
+    if (act === 'mminus') { setMemory(memory - currentValue()); return; }
+    if (act === 'mr') {
+      const val = String(memory);
+      expr = (expr === '' || expr === '0') ? val : expr + val;
+      update(); return;
+    }
+    if (act === 'mc') { setMemory(0); return; }
+
+    if (act === 'equals') {
+      const raw = expr;
+      if (!raw) return;
+      try {
+        const result = evaluate(expr);
+        pushHistory(raw, result);
+        historyLine.textContent = formatDisplay(raw) + ' =';
+        expr = String(result);
+      } catch (e) { expr = 'Error'; }
+      update();
+    }
+  }
+
+  keypad.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const { act, val } = btn.dataset;
+    if (val !== undefined) { pressValue(val); return; }
+    if (act) pressAction(act);
+  });
+
+  // ---------- history panel ----------
+  historyBtn.addEventListener('click', () => {
+    historyPanel.hidden = !historyPanel.hidden;
+    historyBtn.setAttribute('aria-expanded', String(!historyPanel.hidden));
+    if (!historyPanel.hidden) renderHistory();
+  });
+  clearHistoryBtn.addEventListener('click', () => {
+    history = [];
+    try { localStorage.removeItem('tt-calc-history'); } catch (e) {}
+    renderHistory();
+  });
+  historyList.addEventListener('click', e => {
+    const btn = e.target.closest('.calc-history-item');
+    if (!btn) return;
+    expr = history[Number(btn.dataset.idx)].result;
     update();
-  }
-});
+    historyPanel.hidden = true;
+    historyBtn.setAttribute('aria-expanded', 'false');
+  });
 
-document.addEventListener('keydown', e => {
-  if (/[0-9.+\-*/]/.test(e.key)) { expr += e.key; update(); }
-  else if (e.key === 'Enter' || e.key === '=') { document.querySelector('[data-act="equals"]').click(); }
-  else if (e.key === 'Backspace') { expr = expr.slice(0, -1); update(); }
-  else if (e.key === 'Escape') { expr = ''; update(); }
-});
+  // ---------- copy ----------
+  function copyResult() {
+    const text = display.textContent;
+    const done = () => showToast('Copied ' + text);
+    function fallbackCopy() {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
+  }
+  copyBtn.addEventListener('click', copyResult);
+
+  // ---------- mode tabs ----------
+  modeTabs.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-mode]');
+    if (!btn) return;
+    mode = btn.dataset.mode;
+    [...modeTabs.children].forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+    const showCalc = mode !== 'converter';
+    sciGrid.hidden = mode !== 'scientific';
+    calcScreen.hidden = !showCalc;
+    basicGrid.hidden = !showCalc;
+    converterPanel.hidden = showCalc;
+    if (!showCalc) { historyPanel.hidden = true; historyBtn.setAttribute('aria-expanded', 'false'); }
+  });
+
+  // ---------- keyboard ----------
+  document.addEventListener('keydown', e => {
+    if (mode === 'converter') return;
+    if (/^[0-9.+\-*/()]$/.test(e.key)) { pressValue(e.key); return; }
+    if (e.key === '%') { pressAction('percent'); return; }
+    if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); pressAction('equals'); return; }
+    if (e.key === 'Backspace') { expr = expr.slice(0, -1); update(); return; }
+    if (e.key === 'Escape') { pressAction('clear'); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c' && !window.getSelection().toString()) {
+      e.preventDefault(); copyResult();
+    }
+  });
+
+  // ---------- converter ----------
+  const CONV = {
+    length: { units: { m: 1, km: 1000, cm: 0.01, mm: 0.001, mi: 1609.34, yd: 0.9144, ft: 0.3048, in: 0.0254 } },
+    weight: { units: { kg: 1, g: 0.001, mg: 0.000001, t: 1000, lb: 0.453592, oz: 0.0283495 } },
+    temperature: { special: true }
+  };
+  let convCat = 'length';
+  const convCategory = document.getElementById('convCategory');
+  const convFrom = document.getElementById('convFrom');
+  const convTo = document.getElementById('convTo');
+  const convFromUnit = document.getElementById('convFromUnit');
+  const convToUnit = document.getElementById('convToUnit');
+  const convSwap = document.getElementById('convSwap');
+
+  function populateUnits(cat) {
+    const units = cat === 'temperature' ? ['C', 'F', 'K'] : Object.keys(CONV[cat].units);
+    [convFromUnit, convToUnit].forEach(sel => {
+      sel.innerHTML = units.map(u => '<option value="' + u + '">' + u + '</option>').join('');
+    });
+    convToUnit.selectedIndex = Math.min(1, units.length - 1);
+  }
+  function toBaseTemp(v, u) { return u === 'C' ? v : u === 'F' ? (v - 32) * 5 / 9 : v - 273.15; }
+  function fromBaseTemp(v, u) { return u === 'C' ? v : u === 'F' ? v * 9 / 5 + 32 : v + 273.15; }
+  function runConvert() {
+    const val = parseFloat(convFrom.value);
+    if (Number.isNaN(val)) { convTo.value = ''; return; }
+    const fu = convFromUnit.value, tu = convToUnit.value;
+    let result;
+    if (convCat === 'temperature') {
+      result = fromBaseTemp(toBaseTemp(val, fu), tu);
+    } else {
+      const units = CONV[convCat].units;
+      result = val * units[fu] / units[tu];
+    }
+    convTo.value = Math.round(result * 1e6) / 1e6;
+  }
+  convCategory.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-cat]');
+    if (!btn) return;
+    convCat = btn.dataset.cat;
+    [...convCategory.children].forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+    populateUnits(convCat);
+    runConvert();
+  });
+  convFrom.addEventListener('input', runConvert);
+  convFromUnit.addEventListener('change', runConvert);
+  convToUnit.addEventListener('change', runConvert);
+  convSwap.addEventListener('click', () => {
+    const fi = convFromUnit.selectedIndex, ti = convToUnit.selectedIndex;
+    convFromUnit.selectedIndex = ti; convToUnit.selectedIndex = fi;
+    runConvert();
+  });
+  convSwap.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); convSwap.click(); } });
+
+  populateUnits(convCat);
+  runConvert();
+  renderHistory();
+  update();
+})();
 </script>
 </body>
 </html>
