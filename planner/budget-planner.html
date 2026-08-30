@@ -123,6 +123,7 @@ function renderCategories() {
     { id: 1, name: 'Rent / Mortgage', budgeted: 0, spent: 0 },
     { id: 2, name: 'Groceries', budgeted: 0, spent: 0 },
   ]);
+    Store.set('budgetCategories', cats);
   document.getElementById('catCount').textContent = `${cats.length} categor${cats.length === 1 ? 'y' : 'ies'}`;
   document.getElementById('catList').innerHTML = cats.map(c => {
     const pct = c.budgeted > 0 ? Math.min(100, Math.round((c.spent / c.budgeted) * 100)) : (c.spent > 0 ? 100 : 0);
