@@ -66,6 +66,7 @@ try {
 
   await inject('#site-nav', 'partials/nav.html');
   await inject('#site-footer', 'partials/footer.html');
+    await inject('#lead-magnet', 'partials/lead-magnet.html');
   if (document.querySelector('#planner-nav')) {
     await inject('#planner-nav', 'partials/planner-nav.html');
     const plannerKey = document.body.getAttribute('data-planner');
