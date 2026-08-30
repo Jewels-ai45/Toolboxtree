@@ -96,6 +96,7 @@ function renderIncome() {
   const income = Store.get('budgetIncome', [
     { id: 1, label: 'Salary', amount: 0 },
   ]);
+    Store.set('budgetIncome', income);
   const list = document.getElementById('incomeList');
   list.innerHTML = income.map(i => `
     <div class="income-row" data-id="${i.id}">
