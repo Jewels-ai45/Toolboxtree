@@ -287,3 +287,16 @@
 .result-box .big { font-family: var(--font-display); font-size: 2rem; font-weight: 800; color: var(--teal-700); }
 
 .coming-soon-box { text-align: center; padding: 60px 24px; }
+/* ---------- Lead magnet card (Money Reset Pack email opt-in) ---------- */
+.lead-magnet-card {
+  background: linear-gradient(155deg, var(--teal-50), var(--card));
+  border: 1px solid var(--teal-100);
+}
+.lead-magnet-card .lead-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--teal-100); color: var(--teal-700);
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 4px 10px; border-radius: 999px; margin-bottom: 10px;
+}
+.lead-magnet-card .field-row input[type="email"] { flex: 1; min-width: 200px; }
+.lead-magnet-fineprint { font-size: 0.78rem; color: var(--faint); margin-top: 10px; margin-bottom: 0; }
